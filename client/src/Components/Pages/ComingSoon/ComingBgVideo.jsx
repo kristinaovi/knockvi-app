@@ -12,7 +12,6 @@ const ComingsoonVideo = (props) => {
         <Container fluid={true} className='p-0'>
           <div className='comingsoon auth-bg-video'>
             <video className='bgvideo-comingsoon' id='bgvid' poster={comingsoon} playsInline='' autoPlay={true} muted={true} loop={true}>
-              <source src={authVideo} type='video/mp4' />
             </video>
             <div className='comingsoon-inner text-center'>
               <Image attrImage={{ src: `${require('../../../assets/images/logo/logo.png')}`, alt: '' }} />

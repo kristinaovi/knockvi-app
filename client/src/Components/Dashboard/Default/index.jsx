@@ -1,17 +1,11 @@
 import React, { Fragment } from "react";
-import { Container, Row } from "reactstrap";
+import { Col, Container, Row } from "reactstrap";
 import { Breadcrumbs } from "../../../AbstractElements";
 
-import OverallBalance from "./OverallBalance";
-import GreetingCard from "./GreetingCard";
 import WidgetsWrapper from "./WidgetsWraper";
-import RecentOrders from "./RecentOrders";
-import ActivityCard from "./ActivityCard";
-import RecentSales from "./RecentSales";
-import TimelineCard from "./TimelineCard";
-import PreAccountCard from "./PreAccountCard";
-import TotalUserAndFollower from "./TotalUserAndFollower";
-import PaperNote from "./PaperNote";
+import OrderOverview from "./OrderOverview";
+import MonthlyProfits from "./MonthlyProfits";
+import ShippingSummary from "./ShippingSummary";
 
 const Dashboard = () => {
   return (
@@ -19,16 +13,16 @@ const Dashboard = () => {
       <Breadcrumbs mainTitle="Default" parent="Dashboard" title="Default" />
       <Container fluid={true}>
         <Row className="widget-grid">
-          <GreetingCard />
           <WidgetsWrapper />
-          <OverallBalance />
-          <RecentOrders />
-          <ActivityCard />
-          <RecentSales />
-          <TimelineCard />
-          <PreAccountCard />
-          <TotalUserAndFollower />
-          <PaperNote />
+          <Row className="g-3 mb-3">
+            <Col  xl="3" md="4">
+              <MonthlyProfits />
+            </Col>
+            <Col xl="9" md="8">
+              <OrderOverview />
+            </Col>
+          </Row>
+          <ShippingSummary />
         </Row>
       </Container>
     </Fragment>

@@ -386,7 +386,7 @@ export const supportData = [
 
 export const supportColumns = [
   {
-    name: 'Image',
+    name: 'SHIPPING ID',
     selector: (row) => row['image'],
     sortable: true,
     center: false,
@@ -394,37 +394,37 @@ export const supportColumns = [
     maxWidth: '300px',
   },
   {
-    name: 'Position',
+    name: 'PART CODE',
     selector: (row) => row['position'],
     sortable: true,
     center: false,
   },
   {
-    name: 'Salary',
+    name: 'PART NAME',
     selector: (row) => row['salary'],
     sortable: true,
     center: false,
   },
   {
-    name: 'Office',
+    name: 'QUANTITY',
     selector: (row) => row['office'],
     sortable: true,
     center: false,
   },
   {
-    name: 'Skill',
+    name: 'VESSEL BOOKING NO.',
     selector: (row) => row['skill'],
     sortable: true,
     center: false,
   },
   {
-    name: 'Extn',
+    name: 'ETD NKB',
     selector: (row) => row['extn'],
     sortable: true,
     center: false,
   },
   {
-    name: 'Email',
+    name: 'STATUS',
     selector: (row) => row['email'],
     sortable: true,
     center: false,
