@@ -8,8 +8,9 @@ import Social from "../Components/Dashboard/Social";
 import PurchaseOrder from "../Components/Pages/Sales/PurchaseOrder/PurchaseOrder";
 import Quotation from "../Components/Pages/Sales/Quotation/Quotation";
 import SalesReport from "../Components/Pages/Sales/SalesReport/SalesReport";
-import CustomerInformation from "../Components/Pages/Sales/CustomerInformation/CustomerInformation";
-import TestRequest from "../Components/Pages/Sales/TestRequest/TestRequest";
+import CustomerInformation from "../Components/Pages/CustomerInformation/CustomerInformation";
+import ShippingPlan from "../Components/Pages/ShippingPlan/ShippingPlan";
+import TestRequest from "../Components/Pages/TestRequest/TestRequest";
 
 // //widgets
 import Chart from "../Components/Widgets/Chart";
@@ -105,13 +106,6 @@ import Contact from "../Components/Application/Contact/ContactApp";
 import Task from "../Components/Application/Task";
 import TodoContain from "../Components/Application/Todo";
 
-// //Gallary
-import ImageGallery from "../Components/Gallery/ImageGallery";
-import MesonryDesc from "../Components/Gallery/MesonryDesc";
-import MasonryGallery from "../Components/Gallery/MesonryGallery";
-import ImageWithDesc from "../Components/Gallery/ImageWithDesc";
-import ImageHover from "../Components/Gallery/ImageHover";
-
 // //Blog
 import BlogDetail from "../Components/Blog/BlogDetail";
 import BlogPost from "../Components/Blog/BlogPost";
@@ -160,10 +154,6 @@ import JobCards from "../Components/JobSearch/JobCardView";
 import ListView from "../Components/JobSearch/ListView";
 import JobDetails from "../Components/JobSearch/JobDetail";
 import Apply from "../Components/JobSearch/Apply";
-
-// //Learning
-import LearningList from "../Components/Learning/LearningList";
-import DetailCourse from "../Components/Learning/DetailCourse";
 
 // //Map
 import GoogleMaps from "../Components/Map/GoogleMap";
@@ -280,6 +270,7 @@ export const routes = [
   { path: `${process.env.PUBLIC_URL}/sales/quotation/:layout`, Component: <Quotation /> },
   { path: `${process.env.PUBLIC_URL}/sales/sales-report/:layout`, Component: <SalesReport /> },
   { path: `${process.env.PUBLIC_URL}/customer-information/:layout`, Component: <CustomerInformation /> },
+  { path: `${process.env.PUBLIC_URL}/shipping-plan/:layout`, Component: <ShippingPlan /> },
   { path: `${process.env.PUBLIC_URL}/test-request/:layout`, Component: <TestRequest /> },
 
   // //Applicatiion
@@ -313,12 +304,6 @@ export const routes = [
   { path: `${process.env.PUBLIC_URL}/app/ecommerce/wishlist/:layout`, Component: <WishList /> },
   { path: `${process.env.PUBLIC_URL}/app/ecommerce/checkout/:layout`, Component: <CheckOut /> },
   { path: `${process.env.PUBLIC_URL}/app/ecommerce/product-list/:layout`, Component: <ProductListContain /> },
-  // //Gallery
-  { path: `${process.env.PUBLIC_URL}/app/gallery/grids/:layout`, Component: <ImageGallery /> },
-  { path: `${process.env.PUBLIC_URL}/app/gallery/griddesc/:layout`, Component: <ImageWithDesc /> },
-  { path: `${process.env.PUBLIC_URL}/app/gallery/masonrys/:layout`, Component: <MasonryGallery /> },
-  { path: `${process.env.PUBLIC_URL}/app/gallery/masonrydesc/:layout`, Component: <MesonryDesc /> },
-  { path: `${process.env.PUBLIC_URL}/app/gallery/hover_effect/:layout`, Component: <ImageHover /> },
 
   // //page
   { path: `${process.env.PUBLIC_URL}/pages/sample-page/:layout`, Component: <SamplePage /> },
@@ -333,10 +318,6 @@ export const routes = [
   { path: `${process.env.PUBLIC_URL}/app/jobsearch/joblist/:layout`, Component: <ListView /> },
   { path: `${process.env.PUBLIC_URL}/app/jobsearch/jobdetail/:layout`, Component: <JobDetails /> },
   { path: `${process.env.PUBLIC_URL}/app/jobsearch/jobapply/:layout`, Component: <Apply /> },
-
-  // //Learning
-  { path: `${process.env.PUBLIC_URL}/app/learning/learninglist/:layout`, Component: <LearningList /> },
-  { path: `${process.env.PUBLIC_URL}/app/learning/learningdetail/:layout`, Component: <DetailCourse /> },
 
   // //Map
   { path: `${process.env.PUBLIC_URL}/app/map/googlemap/:layout`, Component: <GoogleMaps /> },

@@ -1,10 +1,10 @@
 import React, { Fragment, useContext, useState } from 'react';
 import { Container, Row, Col, Card, CardBody, Nav, NavItem, NavLink, TabContent, TabPane } from 'reactstrap';
 import { Target, Info, CheckCircle, PlusCircle } from 'react-feather';
-import { Closed, All, Open, Add, Upload } from '../../../../Constant';
-import { Breadcrumbs } from '../../../../AbstractElements';
-import ProjectContext from '../../../../_helper/Project/index';
-import CustomizerContext from '../../../../_helper/Customizer';
+import { Closed, All, Open, Add, Upload } from '../../../Constant';
+import { Breadcrumbs } from '../../../AbstractElements';
+import ProjectContext from '../../../_helper/Project/index';
+import CustomizerContext from '../../../_helper/Customizer';
 import CustInfoList from './CustInfoList';
 import NewCustInfo from './NewCustInfo';
 import UploadCustInfo from './UploadCustInfo';

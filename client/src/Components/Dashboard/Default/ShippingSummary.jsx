@@ -1,4 +1,4 @@
-import { supportColumns, supportData } from '../../../Data/SupportTicket';
+import { supportColumns, supportData } from '../../../Data/ShippingPlan';
 import { Card, CardBody, CardHeader } from 'reactstrap';
 import DataTable from 'react-data-table-component';
 import { ShippingSummaryTittle } from '../../../Constant';

@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { custinfoColumns, custinfoData } from '../../../../Data/CustomerInformation';
+import { testreqColumns, testreqData } from '../../../Data/TestRequest';
 import { Card, CardBody, CardHeader } from 'reactstrap';
 import DataTable from 'react-data-table-component';
-import { CustInfoTittle } from '../../../../Constant';
-import { H5 } from '../../../../AbstractElements';
+import { TestRequestTittle } from '../../../Constant';
+import { H5 } from '../../../AbstractElements';
 
-const CustInfoList = () => {
+const TestRequestList = () => {
   const [searchText, setSearchText] = useState('');
 
-  const filteredData = custinfoData.filter(item =>
+  const filteredData = testreqData.filter(item =>
     Object.values(item).some(val =>
       String(val).toLowerCase().includes(searchText.toLowerCase())
     )
@@ -18,7 +18,7 @@ const CustInfoList = () => {
     <Card>
       <CardHeader className='card-no-border'>
         <div className="d-flex justify-content-between align-items-center w-100">
-          <H5>{CustInfoTittle}</H5>
+          <H5>{TestRequestTittle}</H5>
           <input
             type="text"
             className="form-control w-25"
@@ -30,7 +30,7 @@ const CustInfoList = () => {
       </CardHeader>
       <CardBody className='pt-0'>
         <DataTable
-          columns={custinfoColumns}
+          columns={testreqColumns}
           data={filteredData}
           striped={true}
           center={true}
@@ -41,4 +41,4 @@ const CustInfoList = () => {
   );
 };
 
-export default CustInfoList;
+export default TestRequestList;
