@@ -35,7 +35,7 @@ export const MENUITEMS = [
         icon: "home",
         type: "sub",
         active: false,
-        path: `${process.env.PUBLIC_URL}/app/project/project-list`, type: "link"
+        path: `${process.env.PUBLIC_URL}/customer-information`, type: "link"
       },
 
       {

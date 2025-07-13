@@ -8,6 +8,7 @@ import Social from "../Components/Dashboard/Social";
 import PurchaseOrder from "../Components/Pages/Sales/PurchaseOrder/PurchaseOrder";
 import Quotation from "../Components/Pages/Sales/Quotation/Quotation";
 import SalesReport from "../Components/Pages/Sales/SalesReport/SalesReport";
+import CustomerInformation from "../Components/Pages/Sales/CustomerInformation/CustomerInformation";
 
 // //widgets
 import Chart from "../Components/Widgets/Chart";
@@ -277,6 +278,7 @@ export const routes = [
   { path: `${process.env.PUBLIC_URL}/sales/purchase-order/:layout`, Component: <PurchaseOrder /> },
   { path: `${process.env.PUBLIC_URL}/sales/quotation/:layout`, Component: <Quotation /> },
   { path: `${process.env.PUBLIC_URL}/sales/sales-report/:layout`, Component: <SalesReport /> },
+  { path: `${process.env.PUBLIC_URL}/customer-information/:layout`, Component: <CustomerInformation /> },
 
   // //Applicatiion
   { path: `${process.env.PUBLIC_URL}/app/project/project-list/:layout`, Component: <Project /> },

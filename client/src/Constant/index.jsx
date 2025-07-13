@@ -182,6 +182,7 @@ export const ShippingSummaryTittle = "Shipping Summary";
 export const PurchaseOrderTittle = "Purchase Order List";
 export const SalesReportTittle = "Sales Report List";
 export const QuotationTittle = "Quotation List";
+export const CustInfoTittle = "Customer Information List";
 export const TestReqSummaryTittle = "Test Request";
 export const CustInfoSummaryTittle = "Customer Information";
 export const MonthlyProfitsGrowth = "Customer PECGI";
