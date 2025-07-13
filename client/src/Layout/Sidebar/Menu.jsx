@@ -51,7 +51,7 @@ export const MENUITEMS = [
         icon: "ecommerce",
         type: "sub",
         active: false,
-        path: `${process.env.PUBLIC_URL}/app/project/project-list`, type: "link"
+        path: `${process.env.PUBLIC_URL}/test-request`, type: "link"
       },
 
       {
