@@ -24,14 +24,36 @@ export const MENUITEMS = [
         badge: "badge badge-light-secondary",
         active: false,
         children: [
-          { path: `${process.env.PUBLIC_URL}/app/project/project-list`, type: "link", title: "Customer Information" },
-          { path: `${process.env.PUBLIC_URL}/app/project/project-list`, type: "link", title: "Purchase Order" },
-          { path: `${process.env.PUBLIC_URL}/app/project/new-project`, type: "link", title: "Quotation" },
+          { path: `${process.env.PUBLIC_URL}/sales/purchase-order`, type: "link", title: "Purchase Order" },
+          { path: `${process.env.PUBLIC_URL}/sales/Quotation/quotation`, type: "link", title: "Quotation" },
           { path: `${process.env.PUBLIC_URL}/app/project/new-project`, type: "link", title: "Sales Report" },
-          { path: `${process.env.PUBLIC_URL}/app/project/new-project`, type: "link", title: "Shipping Plan" },
-          { path: `${process.env.PUBLIC_URL}/app/project/new-project`, type: "link", title: "Test Request" },
         ],
       },
+
+      {
+        title: "Customer Information",
+        icon: "home",
+        type: "sub",
+        active: false,
+        path: `${process.env.PUBLIC_URL}/app/project/project-list`, type: "link"
+      },
+
+      {
+        title: "Shipping Plan",
+        icon: "ecommerce",
+        type: "sub",
+        active: false,
+        path: `${process.env.PUBLIC_URL}/app/project/project-list`, type: "link"
+      },
+
+      {
+        title: "Test Request",
+        icon: "ecommerce",
+        type: "sub",
+        active: false,
+        path: `${process.env.PUBLIC_URL}/app/project/project-list`, type: "link"
+      },
+
       {
         title: "Production",
         icon: "ecommerce",

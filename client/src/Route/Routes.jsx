@@ -4,6 +4,11 @@ import Default from "../Components/Dashboard/Default";
 import Ecommerce from "../Components/Dashboard/Ecommerce";
 import OnlineCourse from "../Components/Dashboard/OnlineCourse";
 import Social from "../Components/Dashboard/Social";
+// sales
+import PurchaseOrder from "../Components/Pages/Sales/PurchaseOrder/PurchaseOrder";
+import NewPurchaseOrder from "../Components/Pages/Sales/PurchaseOrder/NewPurchaseOrder";
+import Quotation from "../Components/Pages/Sales/Quotation/Quotation";
+import NewQuotation from "../Components/Pages/Sales/Quotation/NewQuotation";
 
 // //widgets
 import Chart from "../Components/Widgets/Chart";
@@ -268,6 +273,13 @@ export const routes = [
   // //Tables
   { path: `${process.env.PUBLIC_URL}/table/reactstraptable/basictable/:layout`, Component: <BasicTables /> },
   { path: `${process.env.PUBLIC_URL}/table/datatable/:layout`, Component: <DataTables /> },
+
+  //Sales
+  { path: `${process.env.PUBLIC_URL}/sales/purchase-order/:layout`, Component: <PurchaseOrder /> },
+  { path: `${process.env.PUBLIC_URL}/sales/purchase-order/new-purchase-order/:layout`, Component: <NewPurchaseOrder /> },
+  { path: `${process.env.PUBLIC_URL}/sales/quotation/:layout`, Component: <Quotation /> },
+  { path: `${process.env.PUBLIC_URL}/sales/purchase-order/new-quotation/:layout`, Component: <NewQuotation /> },
+
 
   // //Applicatiion
   { path: `${process.env.PUBLIC_URL}/app/project/project-list/:layout`, Component: <Project /> },

@@ -1,25 +1,25 @@
 import { supportColumns, supportData } from '../../../Data/SupportTicket';
-import React, { Fragment } from 'react';
+import { Card, CardBody, CardHeader } from 'reactstrap';
 import DataTable from 'react-data-table-component';
 import { ShippingSummaryTittle } from '../../../Constant';
 import { H5 } from '../../../AbstractElements';
 
 const ShippingSummary = () => {
     return (
-        <Fragment>
-            <div className="outer-box border rounded-lg shadow-md p-4 mb-4 bg-white"> {/* Box tambahan */}
-                <H5>{ShippingSummaryTittle}</H5>
-                <div className="table-responsive support-table box-col-7 p-3">
-                    <DataTable
-                        columns={supportColumns}
-                        data={supportData}
-                        striped={true}
-                        center={true}
-                        pagination
-                    />
-                </div>
-            </div>
-        </Fragment>
+    <Card>
+        <CardHeader className='card-no-border'>
+            <H5>{ShippingSummaryTittle}</H5>
+        </CardHeader>
+        <CardBody className='pt-0'>
+            <DataTable
+                columns={supportColumns}
+                data={supportData}
+                striped={true}
+                center={true}
+                pagination
+            />
+      </CardBody>
+    </Card>
     );
 };
 export default ShippingSummary;

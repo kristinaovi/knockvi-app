@@ -179,6 +179,7 @@ export const OrderThisMonthTitle = "Order This Month";
 export const ToGoal = " To Goal";
 export const MonthlyProfitsTitle = "Order Percentage";
 export const ShippingSummaryTittle = "Shipping Summary";
+export const PurchaseOrderTittle = "Purchase Order";
 export const TestReqSummaryTittle = "Test Request";
 export const CustInfoSummaryTittle = "Customer Information";
 export const MonthlyProfitsGrowth = "Customer PECGI";

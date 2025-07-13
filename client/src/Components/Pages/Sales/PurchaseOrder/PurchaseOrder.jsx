@@ -4,11 +4,11 @@ import { Target, Info, CheckCircle, PlusCircle } from 'react-feather';
 import { Link } from 'react-router-dom';
 import { Done, All, Doing, CreateNewProject } from '../../../../Constant';
 import { Breadcrumbs } from '../../../../AbstractElements';
-import ProjectContext from '../../../../_helper/Project';
-import CusClass from '../Common/CusClass';
+import ProjectContext from '../../../../_helper/Project/index';
+import CusClass from '../../../../Components/Application/Project/Common/CusClass';
 import CustomizerContext from '../../../../_helper/Customizer';
 
-const Project = () => {
+const PurchaseOrder = () => {
   const { layoutURL } = useContext(CustomizerContext);
   const [activeTab, setActiveTab] = useState('1');
   const { allData } = useContext(ProjectContext);
@@ -43,4 +43,4 @@ const Project = () => {
   );
 };
 
-export default Project;
+export default PurchaseOrder;
