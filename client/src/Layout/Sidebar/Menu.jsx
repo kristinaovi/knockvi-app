@@ -25,8 +25,8 @@ export const MENUITEMS = [
         active: false,
         children: [
           { path: `${process.env.PUBLIC_URL}/sales/purchase-order`, type: "link", title: "Purchase Order" },
-          { path: `${process.env.PUBLIC_URL}/sales/Quotation/quotation`, type: "link", title: "Quotation" },
-          { path: `${process.env.PUBLIC_URL}/app/project/new-project`, type: "link", title: "Sales Report" },
+          { path: `${process.env.PUBLIC_URL}/sales/quotation`, type: "link", title: "Quotation" },
+          { path: `${process.env.PUBLIC_URL}/sales/sales-report`, type: "link", title: "Sales Report" },
         ],
       },
 

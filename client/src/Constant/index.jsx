@@ -179,7 +179,9 @@ export const OrderThisMonthTitle = "Order This Month";
 export const ToGoal = " To Goal";
 export const MonthlyProfitsTitle = "Order Percentage";
 export const ShippingSummaryTittle = "Shipping Summary";
-export const PurchaseOrderTittle = "Purchase Order";
+export const PurchaseOrderTittle = "Purchase Order List";
+export const SalesReportTittle = "Sales Report List";
+export const QuotationTittle = "Quotation List";
 export const TestReqSummaryTittle = "Test Request";
 export const CustInfoSummaryTittle = "Customer Information";
 export const MonthlyProfitsGrowth = "Customer PECGI";
@@ -470,6 +472,9 @@ export const Forward = "Forward";
 export const More = "More";
 export const Subject = "Subject";
 
+//Purchase-Order
+export const Open = "Open";
+export const Closed = "Closed";
 // file-manager
 export const Hometxt = "Home";
 export const API = "API";
