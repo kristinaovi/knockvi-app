@@ -1,3 +1,4 @@
+
 export const OrderThisMonthChart = {
   series: [
     {
@@ -172,11 +173,11 @@ export const OrderThisMonthChart = {
 
 // Profit  Monthly //
 export const MonthlyProfitsChartData = {
-  series: [30, 55, 35],
+  series: [30, 55, 35, 100, 50],
   options: {
-    labels: ["Shoes", "Grocery", "other"],
+    labels: ["CAP", "CASE", "RING", "DI CAN", "SPACER"],
     chart: {
-      type: "donut",
+      type: "pie",
       height: 300,
     },
     dataLabels: {
@@ -200,13 +201,13 @@ export const MonthlyProfitsChartData = {
       },
     },
     stroke: {
-      width: 10,
+      width: 1,
       colors: ["var(--light2)"],
     },
     plotOptions: {
       pie: {
         expandOnClick: false,
-        donut: {
+        PieChart: {
           size: "83%",
           labels: {
             show: true,
@@ -243,7 +244,7 @@ export const MonthlyProfitsChartData = {
         },
       },
     },
-    colors: ["#54BA4A", "var(--theme-default)", "#FFA941"],
+    colors: ["#FF0000", "#007BFF", "#28A745", "#FFC107", "#6C757D"], 
     responsive: [
       {
         breakpoint: 1630,
@@ -301,19 +302,19 @@ export const MonthlyProfitsChartData = {
 export const OptionsOverView = {
   series: [
     {
-      name: "Earning",
+      name: "Production",
       type: "area",
-      data: [44, 55, 35, 50, 67, 50, 55, 45, 32, 38, 45],
+      data: [44, 55, 35, 50, 67, 50],
     },
     {
       name: "Order",
       type: "area",
-      data: [35, 30, 23, 40, 50, 35, 40, 52, 67, 50, 55],
+      data: [35, 30, 23, 40, 50, 35],
     },
     {
-      name: "Refunds",
+      name: "Shipping",
       type: "area",
-      data: [25, 20, 15, 25, 32, 20, 30, 35, 23, 30, 20],
+      data: [25, 20, 15, 25, 32, 20],
     },
   ],
   options: {
@@ -489,7 +490,7 @@ export const OptionsOverViewBarChart = {
   series: [
     {
       name: "Revenue",
-      data: [30, 40, 18, 25, 18, 10, 20, 35, 22, 40, 30, 38, 20, 35, 11, 28, 40, 11, 28, 40, 11, 28, 40, 11, 28, 40, 11],
+      data: [30, 40, 18, 25, 18, 10],
     },
   ],
   options: {
@@ -519,7 +520,7 @@ export const OptionsOverViewBarChart = {
       colors: ["transparent"],
     },
     xaxis: {
-      categories: ["Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"],
+      categories: ["May", "Jun", "Jul", "Aug", "Sep", "Nov"],
       labels: {
         show: false,
       },

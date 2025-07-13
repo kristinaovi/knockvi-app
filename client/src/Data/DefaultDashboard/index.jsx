@@ -109,13 +109,13 @@ export const LightCardData2 = [
     color: 'success',
   },
   {
-    title: 'Earning',
+    title: 'Production',
     icon: 'expense',
     price: '$12,057',
     color: 'danger',
   },
   {
-    title: 'Refunds',
+    title: 'Shipping',
     icon: 'doller-return',
     price: '3,001',
   },

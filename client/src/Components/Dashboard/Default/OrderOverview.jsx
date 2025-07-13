@@ -13,7 +13,7 @@ const OrderOverview = () => {
       <CardHeader className='card-no-border'>
         <H5>{OrderOverviewTitle}</H5>
       </CardHeader>
-      <CardBody className='pt-0'>
+      <CardBody className='pt-4'>
         <Row className='m-0 overall-card'>
           <Col xl='9' md='8' sm='7' className='box-col-7 p-3'>
             <div className='chart-right'>

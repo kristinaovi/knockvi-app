@@ -6,6 +6,8 @@ import WidgetsWrapper from "./WidgetsWraper";
 import OrderOverview from "./OrderOverview";
 import MonthlyProfits from "./MonthlyProfits";
 import ShippingSummary from "./ShippingSummary";
+import TestReqSummary from "./TestReqSummary";
+import CustInfoSummary from "./CustInfoSummary";
 
 const Dashboard = () => {
   return (
@@ -22,6 +24,16 @@ const Dashboard = () => {
               <OrderOverview />
             </Col>
           </Row>
+
+          <Row className="g-3 mb-3">
+            <Col xl="6" md="8">
+              <CustInfoSummary />
+            </Col>
+            <Col xl="6" md="8">
+              <TestReqSummary />
+            </Col>
+          </Row>
+
           <ShippingSummary />
         </Row>
       </Container>
