@@ -11,6 +11,9 @@ import SalesReport from "../Components/Pages/Sales/SalesReport/SalesReport";
 import CustomerInformation from "../Components/Pages/CustomerInformation/CustomerInformation";
 import ShippingPlan from "../Components/Pages/ShippingPlan/ShippingPlan";
 import TestRequest from "../Components/Pages/TestRequest/TestRequest";
+import ProductionPlan from "../Components/Pages/Production/ProductionPlan";
+import Inventory from "../Components/Pages/Inventory/Inventory";
+
 
 // //widgets
 import Chart from "../Components/Widgets/Chart";
@@ -270,8 +273,10 @@ export const routes = [
   { path: `${process.env.PUBLIC_URL}/sales/quotation/:layout`, Component: <Quotation /> },
   { path: `${process.env.PUBLIC_URL}/sales/sales-report/:layout`, Component: <SalesReport /> },
   { path: `${process.env.PUBLIC_URL}/customer-information/:layout`, Component: <CustomerInformation /> },
-  { path: `${process.env.PUBLIC_URL}/shipping-plan/:layout`, Component: <ShippingPlan /> },
+  { path: `${process.env.PUBLIC_URL}/shipping-plan/:layout`, Component: <ShippingPlan/> },
   { path: `${process.env.PUBLIC_URL}/test-request/:layout`, Component: <TestRequest /> },
+  { path: `${process.env.PUBLIC_URL}/production/:layout`, Component: <ProductionPlan /> },
+  { path: `${process.env.PUBLIC_URL}/inventory/:layout`, Component: <Inventory /> },
 
   // //Applicatiion
   { path: `${process.env.PUBLIC_URL}/app/project/project-list/:layout`, Component: <Project /> },

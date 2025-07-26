@@ -10,7 +10,7 @@ import {
   Input,
 } from 'reactstrap';
 
-const UploadCustInfo = ({ isOpen, toggle }) => {
+const UploadShippingPlan = ({ isOpen, toggle }) => {
   const [selectedFile, setSelectedFile] = useState(null);
 
   const handleFileChange = (e) => {
@@ -48,12 +48,9 @@ const UploadCustInfo = ({ isOpen, toggle }) => {
         <Button color="primary" onClick={handleUpload}>
           Upload
         </Button>
-        <Button color="secondary" onClick={toggle}>
-          Cancel
-        </Button>
       </ModalFooter>
     </Modal>
   );
 };
 
-export default UploadCustInfo ;
+export default UploadShippingPlan ;

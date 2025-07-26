@@ -10,7 +10,6 @@ export const quotData = [
     quotAmount: 'USD 1,653.40',
     quotPO : 'Waiting',
     quotStatus : 'Open',
-    quotDetails : 'See Details',
   },
   {
     quotID :'QNKA-0001',
@@ -20,7 +19,6 @@ export const quotData = [
     quotAmount: 'USD 1,653.40',
     quotPO : 'Waiting',
     quotStatus : 'Open',
-    quotDetails : 'See Details',
   },
   {
     quotID :'QNKA-0001',
@@ -30,7 +28,6 @@ export const quotData = [
     quotAmount: 'USD 1,653.40',
     quotPO : 'Waiting',
     quotStatus : 'Open',
-    quotDetails : 'See Details',
   },
   {
     quotID :'QNKA-0001',
@@ -40,17 +37,6 @@ export const quotData = [
     quotAmount: 'USD 1,653.40',
     quotPO : 'Waiting',
     quotStatus : 'Open',
-    quotDetails : 'See Details',
-  },
-  {
-    quotID :'QNKA-0001',
-    quotSubject: 'CASE CR2032ASS New Tooling',
-    quotTo: 'NKA',
-    quotDate: '07-Apr-2025',
-    quotAmount: 'USD 1,653.40',
-    quotPO : 'Waiting',
-    quotStatus : 'Open',
-    quotDetails : 'See Details',
   },
 ];
 
@@ -94,13 +80,6 @@ export const quotColumns = [
   {
     name: 'STATUS',
     selector: (row) => row['quotStatus'],
-    sortable: true,
-    center: false,
-  },
-
-  {
-    name: 'DETAIL',
-    selector: (row) => row['quotDetails'],
     sortable: true,
     center: false,
   },

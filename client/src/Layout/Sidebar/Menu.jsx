@@ -10,7 +10,6 @@ export const MENUITEMS = [
       active: false,
       path: `${process.env.PUBLIC_URL}/dashboard/default`, title: "Dashboard", type: "link"
     },
-,
     ],
   },
 
@@ -57,35 +56,18 @@ export const MENUITEMS = [
       {
         title: "Production",
         icon: "ecommerce",
+        badge: "badge badge-light-secondary",
         type: "sub",
         active: false,
-        children: [
-          { path: `${process.env.PUBLIC_URL}/app/ecommerce/product`, type: "link", title: "NIPPO" },
-          { path: `${process.env.PUBLIC_URL}/app/ecommerce/product`, type: "link", title: "Product List" },
-        ],
+        path: `${process.env.PUBLIC_URL}/production`, type: "link", title: "Production"
       },
+
       {
-        title: "Logistic",
+        title: "Inventory",
         icon: "chat",
         type: "sub",
         active: false,
-        children: [
-          { path: `${process.env.PUBLIC_URL}/app/chat-app/chats`, type: "link", title: "Inventory" },
-          { path: `${process.env.PUBLIC_URL}/app/chat-app/chat-video-app`, type: "link", title: "Shipping List" },
-        ],
-      },
-      {
-        title: "DLL",
-        icon: "user",
-        path: `${process.env.PUBLIC_URL}/app/users/profile`,
-        type: "sub",
-        bookmark: true,
-        active: false,
-        children: [
-          { path: `${process.env.PUBLIC_URL}/app/users/profile`, type: "link", title: "DLL" },
-          { path: `${process.env.PUBLIC_URL}/app/users/edit`, type: "link", title: "DLL" },
-          { path: `${process.env.PUBLIC_URL}/app/users/cards`, type: "link", title: "DLL" },
-        ],
+        path: `${process.env.PUBLIC_URL}/inventory`, type: "link"
       },
       
     ],
