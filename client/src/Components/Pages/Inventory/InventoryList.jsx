@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { inventoryData } from '../../../Data/Inventory';
 import {
-  Card, CardBody, CardHeader, Row, Col, Modal, ModalHeader, ModalBody, Table, Button, Input
+  Card, CardBody, CardHeader, Row, Col, Modal, ModalHeader, ModalBody, Table, Button
 } from 'reactstrap';
 import DataTable from 'react-data-table-component';
 import { H5 } from '../../../AbstractElements';
 import TableColumnFilter from '../../Filter/TableColumnFilter';
+import { Filter } from "react-feather"; // ✅ Tambah import
 
 const inventoryColumns = (onClickProdID) => [
   {
@@ -36,6 +37,7 @@ const InventoryList = () => {
     remarkStock: '',
   });
 
+  const [showFilters, setShowFilters] = useState(false); // ✅ untuk toggle filter
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedProdRow, setSelectedProdRow] = useState(null);
   const [editedProd, setEditedProd] = useState(null);
@@ -74,18 +76,19 @@ const InventoryList = () => {
 
   return (
     <Card>
-      <CardHeader className="card-no-border">
-        <div className="d-flex justify-content-between align-items-center w-100">
-          <H5>Inventory List</H5>
-        </div>
+      <CardHeader className="card-no-border d-flex justify-content-between align-items-center">
+        <H5 className="mb-0">Inventory List</H5>
+        <Filter className="cursor-pointer" onClick={() => setShowFilters(prev => !prev)} size={18} />
       </CardHeader>
 
       <CardBody className="pt-0">
-        <Row className="mb-3">
-          <Col>
-            <TableColumnFilter filters={filters} setFilters={setFilters} />
-          </Col>
-        </Row>
+        {showFilters && (
+          <Row className="mb-3">
+            <Col>
+              <TableColumnFilter filters={filters} setFilters={setFilters} />
+            </Col>
+          </Row>
+        )}
 
         <DataTable
           columns={inventoryColumns(toggleModal)}

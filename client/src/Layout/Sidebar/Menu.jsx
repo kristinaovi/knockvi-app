@@ -17,24 +17,19 @@ export const MENUITEMS = [
     menucontent: "Ready to use Apps",
     Items: [
       {
-        title: "Sales",
+        title: "Purchase Order",
         icon: "project",
         type: "sub",
         badge: "badge badge-light-secondary",
         active: false,
-        children: [
-          { path: `${process.env.PUBLIC_URL}/sales/purchase-order`, type: "link", title: "Purchase Order" },
-          { path: `${process.env.PUBLIC_URL}/sales/quotation`, type: "link", title: "Quotation" },
-          { path: `${process.env.PUBLIC_URL}/sales/sales-report`, type: "link", title: "Sales Report" },
-        ],
-      },
+        path: `${process.env.PUBLIC_URL}/sales/purchase-order`, type: "link", title: "Purchase Order" },
 
       {
-        title: "Customer Information",
+        title: "Invoice",
         icon: "home",
         type: "sub",
         active: false,
-        path: `${process.env.PUBLIC_URL}/customer-information`, type: "link"
+        path: `${process.env.PUBLIC_URL}/invoice`, type: "link"
       },
 
       {
@@ -43,14 +38,6 @@ export const MENUITEMS = [
         type: "sub",
         active: false,
         path: `${process.env.PUBLIC_URL}/shipping-plan`, type: "link"
-      },
-
-      {
-        title: "Test Request",
-        icon: "ecommerce",
-        type: "sub",
-        active: false,
-        path: `${process.env.PUBLIC_URL}/test-request`, type: "link"
       },
 
       {

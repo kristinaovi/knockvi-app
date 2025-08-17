@@ -18,7 +18,7 @@ import useShippingPlanDetail from '../../../Hooks/useShippingPlanDetail'
 import usePurchaseOrderDetails from '../../../Hooks/usePurchaseOrderDetails'
 import useParts from '../../../Hooks/useParts'
 
-const NewShippingPlan = ({ isOpen, toggle }) => {
+const NewProductionPlan = ({ isOpen, toggle }) => {
   const { createOrUpdate: saveSP } = useShippingPlans()
   const { createOrUpdate: saveSPD } = useShippingPlanDetail()
 
@@ -323,4 +323,4 @@ const NewShippingPlan = ({ isOpen, toggle }) => {
   )
 }
 
-export default NewShippingPlan
+export default NewProductionPlan

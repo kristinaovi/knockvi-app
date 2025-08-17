@@ -17,9 +17,11 @@ import TableColumnFilter from "../../Filter/TableColumnFilter"
 import { H5 } from "../../../AbstractElements"
 import useShippingPlans from "../../../Hooks/useShippingPlans"
 import useShippingPlanDetail from "../../../Hooks/useShippingPlanDetail"
+import { Filter } from "react-feather"
 
 const ShippingPlanList = () => {
-  const { items: plans, fetchAll: fetchPlans, exportCsv } = useShippingPlans()
+  // ❌ hapus exportCsv
+  const { items: plans, fetchAll: fetchPlans } = useShippingPlans()
   const { items: details, fetchAll: fetchDetails } = useShippingPlanDetail()
 
   const [filters, setFilters] = useState({
@@ -35,13 +37,12 @@ const ShippingPlanList = () => {
 
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState(null)
+  const [showFilters, setShowFilters] = useState(false)
 
-  // load shipping plans on mount
   useEffect(() => {
     fetchPlans()
   }, [fetchPlans])
 
-  // handle row click: open modal and fetch its details
   const toggleModal = plan => {
     if (plan) {
       setSelectedPlan(plan)
@@ -52,7 +53,6 @@ const ShippingPlanList = () => {
     setModalOpen(open => !open)
   }
 
-  // map plans to table rows
   const tableData = plans.map(p => ({
     shipID: p.id,
     etdNKB: p.etd_nkb,
@@ -65,14 +65,12 @@ const ShippingPlanList = () => {
     __raw: p
   }))
 
-  // apply filters
   const filtered = tableData.filter(row =>
     Object.entries(filters).every(([key, val]) =>
       !val || row[key]?.toString().toLowerCase().includes(val.toLowerCase())
     )
   )
 
-  // columns definition
   const columns = [
     {
       width: "12rem",
@@ -98,20 +96,33 @@ const ShippingPlanList = () => {
     <Card>
       <CardHeader className="card-no-border d-flex justify-content-between align-items-center">
         <H5>Shipping Plan List</H5>
-        <Button color="primary" onClick={exportCsv}>Export CSV</Button>
+        <div className="d-flex gap-2 align-items-center">
+          {/* ❌ Hapus tombol Export CSV */}
+          <Filter
+            className="cursor-pointer"
+            onClick={() => setShowFilters(prev => !prev)}
+            size={18}
+          />
+        </div>
       </CardHeader>
+
       <CardBody className="pt-0">
+        {showFilters && (
+          <Row className="mb-3">
+            <Col>
+              <TableColumnFilter filters={filters} setFilters={setFilters} />
+            </Col>
+          </Row>
+        )}
+
         <DataTable
           columns={columns}
           data={filtered}
           striped
           pagination
-          subHeader
-          subHeaderComponent={
-            <TableColumnFilter filters={filters} setFilters={setFilters} />
-          }
         />
 
+        {/* Modal detail */}
         <Modal isOpen={modalOpen} toggle={() => setModalOpen(false)} size="lg">
           <ModalHeader
             toggle={() => setModalOpen(false)}
@@ -121,7 +132,6 @@ const ShippingPlanList = () => {
           </ModalHeader>
 
           <ModalBody>
-            {/* Header Info */}
             {selectedPlan && (
               <div className="mb-3">
                 <Row className="mb-2">
@@ -157,7 +167,6 @@ const ShippingPlanList = () => {
               </div>
             )}
 
-            {/* Details Table */}
             <Table bordered responsive className="mt-4">
               <thead>
                 <tr>
@@ -190,17 +199,16 @@ const ShippingPlanList = () => {
                 <tr className="fw-bold">
                   <td></td>
                   <td colSpan="2" className="text-end">Grand Total</td>
-                  <td>{details.reduce((sum, d) => sum + d.original_quantity, 0).toLocaleString()}</td>
-                  <td>{details.reduce((sum, d) => sum + d.actual_quantity, 0).toLocaleString()}</td>
-                  <td>{details.reduce((sum, d) => sum + (d.actual_quantity - d.original_quantity), 0).toLocaleString()}</td>
-                  <td>{details.reduce((sum, d) => sum + d.carton, 0).toLocaleString()}</td>
-                  <td>{details.reduce((sum, d) => sum + d.pallete, 0).toLocaleString()}</td>
+                  <td>{details.reduce((s, d) => s + d.original_quantity, 0).toLocaleString()}</td>
+                  <td>{details.reduce((s, d) => s + d.actual_quantity, 0).toLocaleString()}</td>
+                  <td>{details.reduce((s, d) => s + (d.actual_quantity - d.original_quantity), 0).toLocaleString()}</td>
+                  <td>{details.reduce((s, d) => s + d.carton, 0).toLocaleString()}</td>
+                  <td>{details.reduce((s, d) => s + d.pallete, 0).toLocaleString()}</td>
                 </tr>
               </tbody>
             </Table>
           </ModalBody>
         </Modal>
-
       </CardBody>
     </Card>
   )

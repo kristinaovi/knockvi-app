@@ -1,4 +1,3 @@
-// src/components/NewPurchaseOrder.jsx
 import React, { useState, useEffect } from 'react'
 import {
   Modal,
