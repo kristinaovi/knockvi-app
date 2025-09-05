@@ -48,18 +48,15 @@ const NewShippingPlan = ({ isOpen, toggle }) => {
     cartonActual:    0,
     palleteActual:   0
   }
-  const [newRow, setNewRow]       = useState(null)
+
+  const [draftRows, setDraftRows] = useState([])
   const [tableData, setTableData] = useState([])
 
-  // Re-fetch PO-details *from the server* whenever the user picks a new ETA Cust
   useEffect(() => {
-    // first clear any in‑flight row
-    setNewRow(null)
-    // fetch only those details matching request_date = etd_cust
+    setDraftRows([])
     fetchPODetails({ request_date: shippingInfo.etd_cust })
   }, [shippingInfo.etd_cust, fetchPODetails])
 
-  // parts only need to be fetched once
   useEffect(() => {
     fetchParts()
   }, [fetchParts])
@@ -69,12 +66,18 @@ const NewShippingPlan = ({ isOpen, toggle }) => {
     setShippingInfo(prev => ({ ...prev, [name]: value }))
   }
 
-  const startAddNewRow = () => setNewRow({ ...initialRow })
-  const cancelNewRow   = ()    => setNewRow(null)
+  const startAddNewRow = () => {
+    setDraftRows(dr => [...dr, { ...initialRow }])
+  }
 
-  const handleNewRowChange = (field, value) => {
-    setNewRow(prev => {
-      const next = { ...prev, [field]: value }
+  const cancelNewRow = (index) => {
+    setDraftRows(dr => dr.filter((_, i) => i !== index))
+  }
+
+  const handleDraftRowChange = (index, field, value) => {
+    setDraftRows(dr => {
+      const next = [...dr]
+      const row = { ...next[index] }
 
       if (field === 'POD') {
         const detail = poDetails.find(d => d.id === value)
@@ -82,39 +85,39 @@ const NewShippingPlan = ({ isOpen, toggle }) => {
           const part = parts.find(p => p.id === detail.part_id) || {}
           const cartonQty = part.pack_carton_quantity || 1
 
-          next.partName     = part.name || ''
-          next.price        = detail.price
-          next.quantityPlan = detail.original_quantity
-          next.cartonPlan   = Math.ceil(detail.original_quantity / cartonQty)
-          next.palletePlan  = Math.ceil(next.cartonPlan / 36)
+          row.partName     = part.name || ''
+          row.price        = detail.price
+          row.quantityPlan = detail.original_quantity
+          row.cartonPlan   = Math.ceil(detail.original_quantity / cartonQty)
+          row.palletePlan  = Math.ceil(row.cartonPlan / 36)
         }
       }
 
       if (field === 'actualQuantity') {
-        const part = parts.find(p => p.name === prev.partName) || {}
+        const part = parts.find(p => p.name === row.partName) || {}
         const cartonQty = part.pack_carton_quantity || 1
-
-        next.cartonActual  = Math.ceil(value / cartonQty)
-        next.palleteActual = Math.ceil(next.cartonActual / 36)
+        row.cartonActual  = Math.ceil(value / cartonQty)
+        row.palleteActual = Math.ceil(row.cartonActual / 36)
       }
 
+      row[field] = value
+      next[index] = row
       return next
     })
   }
 
-  const saveNewRow = () => {
-    if (!newRow.POD) {
-      return alert('Please select a PO item (after choosing ETA Cust).')
+  const saveDraftRow = (index) => {
+    const row = draftRows[index]
+    if (!row.POD) {
+      return alert('Please select a PO item.')
     }
-    setTableData(td => [...td, newRow])
-    setNewRow(null)
+    setTableData(td => [...td, row])
+    cancelNewRow(index)
   }
 
   const handleSaveAll = async () => {
     try {
-      // save header
       const { id: spId } = await saveSP(shippingInfo)
-      // save each detail
       await Promise.all(
         tableData.map(row =>
           saveSPD({
@@ -126,7 +129,6 @@ const NewShippingPlan = ({ isOpen, toggle }) => {
           })
         )
       )
-      // reset
       setTableData([])
       setShippingInfo({
         etd_nkb:'', booking_number:'', container_name:'',
@@ -143,7 +145,6 @@ const NewShippingPlan = ({ isOpen, toggle }) => {
     <Modal isOpen={isOpen} toggle={toggle} size="xl">
       <ModalHeader toggle={toggle}>Add New Shipping Plan</ModalHeader>
       <ModalBody>
-        {/* Header form */}
         <Form className="d-flex mb-4">
           <div className="me-3" style={{ flex: 1 }}>
             <FormGroup>
@@ -201,7 +202,6 @@ const NewShippingPlan = ({ isOpen, toggle }) => {
           </div>
         </Form>
 
-        {/* Details */}
         <div className="table-responsive">
           <Table bordered striped>
             <thead>
@@ -220,7 +220,7 @@ const NewShippingPlan = ({ isOpen, toggle }) => {
             <tbody>
               {tableData.map((row, idx) => (
                 <tr key={idx}>
-                  <td>{poDetails.find(d => d.id === row.POD)?.line}</td>
+                  <td>{poDetails.find(d => d.id === row.POD)?.part_name}</td>
                   <td>{row.price}</td>
                   <td>{row.quantityPlan}</td>
                   <td>{row.cartonPlan}</td>
@@ -242,13 +242,13 @@ const NewShippingPlan = ({ isOpen, toggle }) => {
                 </tr>
               ))}
 
-              {newRow && (
-                <tr>
+              {draftRows.map((row, idx) => (
+                <tr key={`draft-${idx}`}>
                   <td style={{ minWidth: 200 }}>
                     <Select
                       options={poDetails.map(d => ({
                         value: d.id,
-                        label: d.line
+                        label: `${d.part_code} - ${d.part_name}`
                       }))}
                       isDisabled={!shippingInfo.etd_cust}
                       placeholder={
@@ -257,49 +257,50 @@ const NewShippingPlan = ({ isOpen, toggle }) => {
                           : 'Pick ETA Cust first'
                       }
                       value={
-                        newRow.POD
-                          ? { value: newRow.POD, label: poDetails.find(d => d.id === newRow.POD)?.line }
+                        row.POD
+                          ? { value: row.POD, label: poDetails.find(d => d.id === row.POD)?.part_name }
                           : null
                       }
-                      onChange={opt => handleNewRowChange('POD', opt.value)}
+                      onChange={opt => handleDraftRowChange(idx, 'POD', opt.value)}
                     />
                   </td>
-                  <td><Input readOnly value={newRow.price} /></td>
-                  <td><Input readOnly value={newRow.quantityPlan} /></td>
-                  <td><Input readOnly value={newRow.cartonPlan} /></td>
-                  <td><Input readOnly value={newRow.palletePlan} /></td>
+                  <td><Input readOnly value={row.price} /></td>
+                  <td><Input readOnly value={row.quantityPlan} /></td>
+                  <td><Input readOnly value={row.cartonPlan} /></td>
+                  <td><Input readOnly value={row.palletePlan} /></td>
                   <td>
                     <Input
                       type="number"
-                      value={newRow.actualQuantity}
+                      value={row.actualQuantity}
                       onChange={e =>
-                        handleNewRowChange(
+                        handleDraftRowChange(
+                          idx,
                           'actualQuantity',
                           parseInt(e.target.value, 10) || 0
                         )
                       }
                     />
                   </td>
-                  <td><Input readOnly value={newRow.cartonActual} /></td>
-                  <td><Input readOnly value={newRow.palleteActual} /></td>
+                  <td><Input readOnly value={row.cartonActual} /></td>
+                  <td><Input readOnly value={row.palleteActual} /></td>
                   <td>
                     <Button
                       color="success"
                       size="sm"
-                      onClick={saveNewRow}
+                      onClick={() => saveDraftRow(idx)}
                     >
                       ✓
                     </Button>{' '}
                     <Button
                       color="danger"
                       size="sm"
-                      onClick={cancelNewRow}
+                      onClick={() => cancelNewRow(idx)}
                     >
                       ×
                     </Button>
                   </td>
                 </tr>
-              )}
+              ))}
 
               <tr>
                 <td colSpan="9" className="text-center">
@@ -312,7 +313,6 @@ const NewShippingPlan = ({ isOpen, toggle }) => {
           </Table>
         </div>
 
-        {/* Save */}
         <div className="text-end mt-3">
           <Button color="success" onClick={handleSaveAll}>
             Save

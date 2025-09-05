@@ -4,12 +4,18 @@ import {
   Row,
   Col,
   Card,
-  CardBody,
   Nav,
   NavItem,
   NavLink,
-  TabContent,
-  TabPane,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Form,
+  FormGroup,
+  Label,
+  Input,
 } from "reactstrap";
 import { Target, Info, CheckCircle, PlusCircle } from "react-feather";
 import { Closed, All, Open, Add } from "../../../Constant";
@@ -22,10 +28,27 @@ const ProductionPlan = () => {
   const { layoutURL } = useContext(CustomizerContext);
   const [activeTab, setActiveTab] = useState("1");
   const { allData } = useContext(ProjectContext);
+
+  // Modal Add Production Plan
   const [modalOpen, setModalOpen] = useState(false);
   const toggleModal = () => setModalOpen(!modalOpen);
-  const [uploadModalOpen, setUploadModalOpen] = useState(false);
-  const toggleUploadModal = () => setUploadModalOpen(!uploadModalOpen);
+
+  const [formData, setFormData] = useState({
+    prodName: "",
+    prodMC: "",
+    prodOutput: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSave = () => {
+    console.log("Saving data:", formData);
+    // TODO: Panggil API ke backend (POST /api/production-plans)
+    toggleModal();
+    setFormData({ prodName: "", prodMC: "", prodOutput: "" });
+  };
 
   return (
     <Fragment>
@@ -83,11 +106,60 @@ const ProductionPlan = () => {
               </Row>
             </Card>
           </Col>
+
+          {/* List Data */}
           <Col>
             <ProductionPlanList />
           </Col>
         </Row>
       </Container>
+
+      {/* Modal Add Production Plan */}
+      <Modal isOpen={modalOpen} toggle={toggleModal}>
+        <ModalHeader toggle={toggleModal}>Add Production Plan</ModalHeader>
+        <ModalBody>
+          <Form>
+            <FormGroup>
+              <Label for="prodName">Production Name</Label>
+              <Input
+                type="text"
+                id="prodName"
+                name="prodName"
+                value={formData.prodName}
+                onChange={handleChange}
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label for="prodMC">Machine</Label>
+              <Input
+                type="text"
+                id="prodMC"
+                name="prodMC"
+                value={formData.prodMC}
+                onChange={handleChange}
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label for="prodOutput">Output</Label>
+              <Input
+                type="number"
+                id="prodOutput"
+                name="prodOutput"
+                value={formData.prodOutput}
+                onChange={handleChange}
+              />
+            </FormGroup>
+          </Form>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="secondary" onClick={toggleModal}>
+            Cancel
+          </Button>
+          <Button color="primary" onClick={handleSave}>
+            Save
+          </Button>
+        </ModalFooter>
+      </Modal>
     </Fragment>
   );
 };

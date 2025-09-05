@@ -1,28 +1,19 @@
 // src/components/ShippingPlanList.jsx
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react";
 import {
-  Card,
-  CardBody,
-  CardHeader,
-  Button,
-  Modal,
-  ModalHeader,
-  ModalBody,
-  Row,
-  Col,
-  Table
-} from "reactstrap"
-import DataTable from "react-data-table-component"
-import TableColumnFilter from "../../Filter/TableColumnFilter"
-import { H5 } from "../../../AbstractElements"
-import useShippingPlans from "../../../Hooks/useShippingPlans"
-import useShippingPlanDetail from "../../../Hooks/useShippingPlanDetail"
-import { Filter } from "react-feather"
+  Card, CardBody, CardHeader, Button, Modal, ModalHeader, ModalBody,
+  Row, Col, Table, Input
+} from "reactstrap";
+import DataTable from "react-data-table-component";
+import TableColumnFilter from "../../Filter/TableColumnFilter";
+import { H5 } from "../../../AbstractElements";
+import useShippingPlans from "../../../Hooks/useShippingPlans";
+import useShippingPlanDetail from "../../../Hooks/useShippingPlanDetail";
+import { Filter } from "react-feather";
 
 const ShippingPlanList = () => {
-  // ❌ hapus exportCsv
-  const { items: plans, fetchAll: fetchPlans } = useShippingPlans()
-  const { items: details, fetchAll: fetchDetails } = useShippingPlanDetail()
+  const { items: plans, fetchAll: fetchPlans, createOrUpdate: updatePlan } = useShippingPlans();
+  const { items: details, fetchAll: fetchDetails, createOrUpdate: updateDetail } = useShippingPlanDetail();
 
   const [filters, setFilters] = useState({
     shipID: "",
@@ -33,27 +24,126 @@ const ShippingPlanList = () => {
     contID: "",
     invNo: "",
     shipStatus: "",
-  })
+  });
 
-  const [modalOpen, setModalOpen] = useState(false)
-  const [selectedPlan, setSelectedPlan] = useState(null)
-  const [showFilters, setShowFilters] = useState(false)
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [editedPlan, setEditedPlan] = useState(null);
+  const [editedDetails, setEditedDetails] = useState([]);
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    fetchPlans()
-  }, [fetchPlans])
+    fetchPlans();
+  }, [fetchPlans]);
 
-  const toggleModal = plan => {
+  const toggleModal = (plan) => {
     if (plan) {
-      setSelectedPlan(plan)
-      fetchDetails({ shipping_plan_id: plan.id })
+      const { issuer_email, ...cleanPlan } = plan;
+      setSelectedPlan(plan);
+      setEditedPlan(cleanPlan);
+      fetchDetails({ shipping_plan_id: plan.id });
+      setEditMode(false);
     } else {
-      setSelectedPlan(null)
+      setSelectedPlan(null);
+      setEditedPlan(null);
     }
-    setModalOpen(open => !open)
-  }
+    setModalOpen((open) => !open);
+  };
 
-  const tableData = plans.map(p => ({
+  useEffect(() => {
+    if (details.length > 0) {
+      setEditedDetails(details.map((d) => ({ ...d })));
+    }
+  }, [details]);
+
+  const handlePlanFieldChange = (e) => {
+    const { name, value } = e.target;
+    setEditedPlan((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDetailFieldChange = (index, field, value, row = null) => {
+    console.log(row)
+    setEditedDetails((prev) => {
+      const updated = [...prev];
+      let updatedRow = { ...updated[index], [field]: value };
+
+      if (field === "actual_quantity") {
+        const cartonQty = row?.part_pack_carton_quantity || 1;
+        console.log(cartonQty, 'carton qty ygy')
+        const carton = Math.ceil(value / cartonQty);
+        const pallete = Math.ceil(carton / 36);
+        updatedRow = {
+          ...updatedRow,
+          actual_quantity: value,
+          carton,
+          pallete
+        };
+      }
+
+      updated[index] = updatedRow;
+      return updated;
+    });
+  };
+
+  const handleSave = async () => {
+    try {
+      await updatePlan(editedPlan);
+      await Promise.all(
+        editedDetails.map((d) =>
+          updateDetail({
+            id: d.id,
+            shipping_plan_id: selectedPlan.id,
+            actual_quantity: d.actual_quantity,
+            carton: d.carton,
+            pallete: d.pallete,
+            purchase_order_detail_id: d.purchase_order_detail_id
+          })
+        )
+      );
+      setEditMode(false);
+      fetchPlans();
+      fetchDetails({ shipping_plan_id: selectedPlan.id });
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save updates");
+    }
+  };
+
+  const columns = [
+    {
+      width: "12rem",
+      name: "SHIPPING ID",
+      selector: (row) => row.shipID,
+      cell: (row) => (
+        <Button color="link" onClick={() => toggleModal(row.__raw)}>
+          {row.shipID}
+        </Button>
+      ),
+      sortable: true,
+    },
+    { name: "ETD NKB", selector: (row) => row.etdNKB, sortable: true },
+    { name: "ETA CUST", selector: (row) => row.etaCust, sortable: true },
+    { name: "BOOKING NO.", selector: (row) => row.bookingID, sortable: true },
+    { name: "VESSEL", selector: (row) => row.vesselID, sortable: true },
+    { name: "CONTAINER", selector: (row) => row.contID, sortable: true },
+    { name: "INVOICE NO.", selector: (row) => row.invNo, sortable: true },
+    {
+      name: "STATUS",
+      selector: (row) => row.shipStatus,
+      sortable: true,
+      cell: (row) => {
+        const isClosed = row.openQty === 0;
+        return (
+          <span className={`badge ${isClosed ? "bg-success" : "bg-warning"}`}>
+            {isClosed ? "Closed" : "Open"}
+          </span>
+        );
+      },
+    },
+  ];
+
+  const tableData = plans.map((p) => ({
     shipID: p.id,
     etdNKB: p.etd_nkb,
     etaCust: p.etd_cust,
@@ -62,48 +152,26 @@ const ShippingPlanList = () => {
     contID: p.container_name,
     invNo: p.invoice_id,
     shipStatus: p.status,
-    __raw: p
-  }))
+    openQty: p.open_qty ?? 0,
+    __raw: p,
+  }));
 
-  const filtered = tableData.filter(row =>
-    Object.entries(filters).every(([key, val]) =>
-      !val || row[key]?.toString().toLowerCase().includes(val.toLowerCase())
+  const filtered = tableData.filter((row) =>
+    Object.entries(filters).every(
+      ([key, val]) =>
+        !val || row[key]?.toString().toLowerCase().includes(val.toLowerCase())
     )
-  )
-
-  const columns = [
-    {
-      width: "12rem",
-      name: "SHIPPING ID",
-      selector: row => row.shipID,
-      cell: row => (
-        <Button color="link" onClick={() => toggleModal(row.__raw)}>
-          {row.shipID}
-        </Button>
-      ),
-      sortable: true,
-    },
-    { name: "ETD NKB", selector: row => row.etdNKB, sortable: true },
-    { name: "ETA CUST", selector: row => row.etaCust, sortable: true },
-    { name: "BOOKING NO.", selector: row => row.bookingID, sortable: true },
-    { name: "VESSEL", selector: row => row.vesselID, sortable: true },
-    { name: "CONTAINER", selector: row => row.contID, sortable: true },
-    { name: "INVOICE NO.", selector: row => row.invNo, sortable: true },
-    { name: "STATUS", selector: row => row.shipStatus, sortable: true },
-  ]
+  );
 
   return (
     <Card>
       <CardHeader className="card-no-border d-flex justify-content-between align-items-center">
         <H5>Shipping Plan List</H5>
-        <div className="d-flex gap-2 align-items-center">
-          {/* ❌ Hapus tombol Export CSV */}
-          <Filter
-            className="cursor-pointer"
-            onClick={() => setShowFilters(prev => !prev)}
-            size={18}
-          />
-        </div>
+        <Filter
+          className="cursor-pointer"
+          onClick={() => setShowFilters((prev) => !prev)}
+          size={18}
+        />
       </CardHeader>
 
       <CardBody className="pt-0">
@@ -115,53 +183,110 @@ const ShippingPlanList = () => {
           </Row>
         )}
 
-        <DataTable
-          columns={columns}
-          data={filtered}
-          striped
-          pagination
-        />
+        <DataTable columns={columns} data={filtered} striped pagination />
 
-        {/* Modal detail */}
         <Modal isOpen={modalOpen} toggle={() => setModalOpen(false)} size="lg">
           <ModalHeader
             toggle={() => setModalOpen(false)}
             className="position-relative pe-5"
           >
             SHIPPING PLAN DETAILS – {selectedPlan?.id}
+            <Button
+              className="position-absolute top-50 end-0 translate-middle-y me-5"
+              color={editMode ? "success" : "primary"}
+              onClick={() => (editMode ? handleSave() : setEditMode(true))}
+            >
+              {editMode ? "Save" : "Edit"}
+            </Button>
           </ModalHeader>
 
           <ModalBody>
-            {selectedPlan && (
+            {editedPlan && (
               <div className="mb-3">
                 <Row className="mb-2">
                   <Col md={6}>
-                    <strong>ETD NKB:</strong><br />
-                    {selectedPlan.etd_nkb}
+                    <strong>ETD NKB:</strong>
+                    <br />
+                    {editMode ? (
+                      <Input
+                        type="date"
+                        name="etd_nkb"
+                        value={editedPlan.etd_nkb || ""}
+                        onChange={handlePlanFieldChange}
+                      />
+                    ) : (
+                      editedPlan.etd_nkb
+                    )}
                   </Col>
                   <Col md={6}>
-                    <strong>ETA CUST:</strong><br />
-                    {selectedPlan.etd_cust}
+                    <strong>ETA CUST:</strong>
+                    <br />
+                    {editMode ? (
+                      <Input
+                        type="date"
+                        name="etd_cust"
+                        value={editedPlan.etd_cust || ""}
+                        onChange={handlePlanFieldChange}
+                      />
+                    ) : (
+                      editedPlan.etd_cust
+                    )}
                   </Col>
                 </Row>
                 <Row className="mb-2">
                   <Col md={6}>
-                    <strong>BOOKING NO.:</strong><br />
-                    {selectedPlan.booking_number}
+                    <strong>BOOKING NO.:</strong>
+                    <br />
+                    {editMode ? (
+                      <Input
+                        name="booking_number"
+                        value={editedPlan.booking_number || ""}
+                        onChange={handlePlanFieldChange}
+                      />
+                    ) : (
+                      editedPlan.booking_number
+                    )}
                   </Col>
                   <Col md={6}>
-                    <strong>VESSEL:</strong><br />
-                    {selectedPlan.vessel_name}
+                    <strong>VESSEL:</strong>
+                    <br />
+                    {editMode ? (
+                      <Input
+                        name="vessel_name"
+                        value={editedPlan.vessel_name || ""}
+                        onChange={handlePlanFieldChange}
+                      />
+                    ) : (
+                      editedPlan.vessel_name
+                    )}
                   </Col>
                 </Row>
                 <Row className="mb-2">
                   <Col md={6}>
-                    <strong>CONTAINER:</strong><br />
-                    {selectedPlan.container_name}
+                    <strong>CONTAINER:</strong>
+                    <br />
+                    {editMode ? (
+                      <Input
+                        name="container_name"
+                        value={editedPlan.container_name || ""}
+                        onChange={handlePlanFieldChange}
+                      />
+                    ) : (
+                      editedPlan.container_name
+                    )}
                   </Col>
                   <Col md={6}>
-                    <strong>INVOICE NO.:</strong><br />
-                    {selectedPlan.invoice_id}
+                    <strong>INVOICE NO.:</strong>
+                    <br />
+                    {editMode ? (
+                      <Input
+                        name="invoice_id"
+                        value={editedPlan.invoice_id || ""}
+                        onChange={handlePlanFieldChange}
+                      />
+                    ) : (
+                      editedPlan.invoice_id
+                    )}
                   </Col>
                 </Row>
               </div>
@@ -181,37 +306,45 @@ const ShippingPlanList = () => {
                 </tr>
               </thead>
               <tbody>
-                {details.map((d, idx) => {
-                  const plusMinus = d.actual_quantity - d.original_quantity
+                {editedDetails.map((d, idx) => {
+                  const plusMinus = (d.actual_quantity || 0) - (d.original_quantity || 0);
                   return (
                     <tr key={idx}>
                       <td>{idx + 1}</td>
                       <td>{d.part_code}</td>
                       <td>{d.part_name}</td>
                       <td>{d.original_quantity?.toLocaleString()}</td>
-                      <td>{d.actual_quantity?.toLocaleString()}</td>
+                      <td>
+                        {editMode ? (
+                          <Input
+                            type="number"
+                            value={d.actual_quantity || 0}
+                            onChange={(e) =>
+                              handleDetailFieldChange(
+                                idx,
+                                "actual_quantity",
+                                parseInt(e.target.value, 10) || 0,
+                                d
+                              )
+                            }
+                          />
+                        ) : (
+                          d.actual_quantity?.toLocaleString()
+                        )}
+                      </td>
                       <td>{plusMinus.toLocaleString()}</td>
-                      <td>{d.carton.toLocaleString()}</td>
-                      <td>{d.pallete.toLocaleString()}</td>
+                      <td>{(d.carton || 0).toLocaleString()}</td>
+                      <td>{(d.pallete || 0).toLocaleString()}</td>
                     </tr>
-                  )
+                  );
                 })}
-                <tr className="fw-bold">
-                  <td></td>
-                  <td colSpan="2" className="text-end">Grand Total</td>
-                  <td>{details.reduce((s, d) => s + d.original_quantity, 0).toLocaleString()}</td>
-                  <td>{details.reduce((s, d) => s + d.actual_quantity, 0).toLocaleString()}</td>
-                  <td>{details.reduce((s, d) => s + (d.actual_quantity - d.original_quantity), 0).toLocaleString()}</td>
-                  <td>{details.reduce((s, d) => s + d.carton, 0).toLocaleString()}</td>
-                  <td>{details.reduce((s, d) => s + d.pallete, 0).toLocaleString()}</td>
-                </tr>
               </tbody>
             </Table>
           </ModalBody>
         </Modal>
       </CardBody>
     </Card>
-  )
-}
+  );
+};
 
-export default ShippingPlanList
+export default ShippingPlanList;

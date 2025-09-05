@@ -20,7 +20,7 @@ import api from "../api/axios"
 import man from "../assets/images/dashboard/profile.png"
 
 const Signin = ({ selected }) => {
-  const [email, setEmail] = useState("test@gmail.com")
+  const [email, setEmail] = useState("example@nissinjpn.co.jp")
   const [password, setPassword] = useState("test123")
   const [togglePassword, setTogglePassword] = useState(false)
   const navigate = useNavigate()
@@ -73,7 +73,7 @@ const Signin = ({ selected }) => {
                   <H4>
                     {selected === "simpleLogin"
                       ? ""
-                      : "Sign In With Simple Login"}
+                      : "Welcome"}
                   </H4>
                   <P>Enter your email &amp; password to login</P>
 
@@ -133,7 +133,6 @@ const Signin = ({ selected }) => {
                     </Btn>
                   </div>
 
-                  <OtherWay />
                 </Form>
               </div>
             </div>
