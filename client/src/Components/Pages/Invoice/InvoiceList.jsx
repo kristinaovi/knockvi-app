@@ -1,21 +1,38 @@
-import React, { useState } from 'react';
-import { invColumns, invData } from '../../../Data/Invoice';
-import { Card, CardBody, CardHeader } from 'reactstrap';
-import DataTable from 'react-data-table-component';
-import { H5 } from '../../../AbstractElements';
+import React, { useState, useEffect } from "react";
+import { Card, CardBody, CardHeader } from "reactstrap";
+import DataTable from "react-data-table-component";
+import { H5 } from "../../../AbstractElements";
+import useInvoices from "../../../Hooks/useInvoices";
 
 const InvoiceList = () => {
-  const [searchText, setSearchText] = useState('');
+  const { fetchAll } = useInvoices(); // gunakan fetchAll dari hook
+  const [invoices, setInvoices] = useState([]);
+  const [searchText, setSearchText] = useState("");
 
-  const filteredData = invData.filter(item =>
-    Object.values(item).some(val =>
-      String(val).toLowerCase().includes(searchText.toLowerCase())
+  // Load data dari API saat komponen pertama kali di-render
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      try {
+        const data = await fetchAll(); // ambil data dari API /invoices
+        setInvoices(data);
+      } catch (error) {
+        console.error("Failed to fetch invoices:", error);
+      }
+    };
+    fetchInvoices();
+  }, [fetchAll]);
+
+  const filteredData = invoices.filter((item) =>
+    Object.values(item).some((val) =>
+      String(val ?? "")
+        .toLowerCase()
+        .includes(searchText.toLowerCase())
     )
   );
 
   return (
     <Card>
-      <CardHeader className='card-no-border'>
+      <CardHeader className="card-no-border">
         <div className="d-flex justify-content-between align-items-center w-100">
           <H5>Invoice List</H5>
           <input
@@ -27,12 +44,18 @@ const InvoiceList = () => {
           />
         </div>
       </CardHeader>
-      <CardBody className='pt-0'>
+      <CardBody className="pt-0">
         <DataTable
-          columns={invColumns}
+          columns={[
+            { name: "Invoice Number", selector: (row) => row.invoice_number, sortable: true },
+            { name: "Customer", selector: (row) => row.customer, sortable: true },
+            { name: "ETD NKB", selector: (row) => row.etd_nkb, sortable: true },
+            { name: "ETA Customer", selector: (row) => row.eta_customer, sortable: true },
+            { name: "Ship Method", selector: (row) => row.ship_method, sortable: true },
+          ]}
           data={filteredData}
-          striped={true}
-          center={true}
+          striped
+          center
           pagination
         />
       </CardBody>

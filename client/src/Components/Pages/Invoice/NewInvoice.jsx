@@ -1,157 +1,131 @@
+// src/components/Invoice/NewInvoice.jsx
 import React, { useState } from "react";
 import {
   Modal,
   ModalHeader,
   ModalBody,
+  ModalFooter,
   Button,
   Form,
   FormGroup,
   Label,
   Input,
-  Table,
 } from "reactstrap";
-import Select from "react-select";
+import useInvoices from "../../../Hooks/useInvoices";
 
-const NewInvoice = ({ isOpen, toggle }) => {
-  // State contoh
-  const [shippingInfo, setShippingInfo] = useState({
+const NewInvoice = ({ isOpen, toggle, onSaved }) => {
+  const { create } = useInvoices();
+
+  // State form sesuai kebutuhan Anda
+  const [formData, setFormData] = useState({
+    invoice_number: "",
+    customer: "",
     etd_nkb: "",
-    etd_cust: "",
-    booking_number: "",
-    container_name: "",
-    vessel_name: "",
-    invoice_id: "",
+    eta_customer: "",
+    ship_method: "",
   });
 
-  const [tableData, setTableData] = useState([]);
-  const [draftRows, setDraftRows] = useState([]);
-
-  // Contoh data PO
-  const poDetails = [
-    { id: 1, part_code: "P001", part_name: "Part A" },
-    { id: 2, part_code: "P002", part_name: "Part B" },
-  ];
-
-  // Handler
-  const handleShippingChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setShippingInfo((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const startAddNewRow = () => {
-    setDraftRows((prev) => [
+    setFormData((prev) => ({
       ...prev,
-      {
-        POD: "",
-        price: "",
-        quantityPlan: "",
-        cartonPlan: "",
-        palletePlan: "",
-        actualQuantity: 0,
-        cartonActual: "",
-        palleteActual: "",
-      },
-    ]);
+      [name]: value,
+    }));
   };
 
-  const handleDraftRowChange = (index, field, value) => {
-    setDraftRows((prev) => {
-      const updated = [...prev];
-      updated[index][field] = value;
-      return updated;
-    });
-  };
+  const handleSaveAll = async () => {
+    try {
+      // Validasi wajib diisi
+      if (
+        !formData.invoice_number ||
+        !formData.customer ||
+        !formData.etd_nkb ||
+        !formData.eta_customer ||
+        !formData.ship_method
+      ) {
+        alert("Semua field wajib diisi!");
+        return;
+      }
 
-  const saveDraftRow = (index) => {
-    setTableData((prev) => [...prev, draftRows[index]]);
-    setDraftRows((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const cancelNewRow = (index) => {
-    setDraftRows((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSaveAll = () => {
-    console.log("Saving...", shippingInfo, tableData);
-    toggle();
+      await create(formData); // menggunakan fungsi create dari useResource
+      if (onSaved) onSaved(); // reload tabel di InvoiceList
+      toggle(); // tutup modal
+    } catch (error) {
+      console.error("Failed to save invoice:", error);
+      alert("Gagal menyimpan invoice. Silakan cek console untuk detail.");
+    }
   };
 
   return (
-    <Modal isOpen={isOpen} toggle={toggle} size="xl">
-      <ModalHeader toggle={toggle}>Add New Invoice</ModalHeader>
+    <Modal isOpen={isOpen} toggle={toggle}>
+      <ModalHeader toggle={toggle}>New Invoice</ModalHeader>
       <ModalBody>
-        <Form className="d-flex mb-4">
-          <div className="me-3" style={{ flex: 1 }}>
-            <FormGroup>
-              <Label>
-                <strong>Invoice ID</strong>
-              </Label>
-              <Input
-                type="text"
-                name="etd_nkb"
-                value={shippingInfo.etd_nkb}
-                onChange={handleShippingChange}
-              />
-            </FormGroup>
-            <FormGroup>
-              <Label>
-                <strong>ETD NKB</strong>
-              </Label>
-              <Input
-                type="date"
-                name="etd_nkb"
-                value={shippingInfo.etd_nkb}
-                onChange={handleShippingChange}
-              />
-            </FormGroup>
-            <FormGroup>
-              <Label>
-                <strong>Ship Methode</strong>
-              </Label>
-              <Input
-                type="select"
-                name="ship_method"
-                value={shippingInfo.ship_method}
-                onChange={handleShippingChange}
-              >
-                <option value="">-- Select Ship Method --</option>
-                <option value="Sea">Sea</option>
-                <option value="Air">Air</option>
-              </Input>
-            </FormGroup>
-          </div>
-          <div style={{ flex: 1 }}>
-            <FormGroup>
-              <Label>
-                <strong>Customer</strong>
-              </Label>
-              <Input
-                type="text"
-                name="etd_cust"
-                value={shippingInfo.etd_cust}
-                onChange={handleShippingChange}
-              />
-            </FormGroup>
-            <FormGroup>
-              <Label>
-                <strong>ETA Customer</strong>
-              </Label>
-              <Input
-                type="date"
-                name="etd_nkb"
-                value={shippingInfo.etd_nkb}
-                onChange={handleShippingChange}
-              />
-            </FormGroup>
-          </div>
-        </Form>
+        <Form>
+          <FormGroup>
+            <Label><strong>Invoice Number</strong></Label>
+            <Input
+              type="text"
+              name="invoice_number"
+              value={formData.invoice_number}
+              onChange={handleChange}
+              required
+            />
+          </FormGroup>
 
-        <div className="text-end mt-3">
-          <Button color="success" onClick={handleSaveAll}>
-            Save
-          </Button>
-        </div>
+          <FormGroup>
+            <Label><strong>Customer</strong></Label>
+            <Input
+              type="text"
+              name="customer"
+              value={formData.customer}
+              onChange={handleChange}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label><strong>ETD NKB (Tanggal Berangkat)</strong></Label>
+            <Input
+              type="date"
+              name="etd_nkb"
+              value={formData.etd_nkb}
+              onChange={handleChange}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label><strong>ETA Customer (Tanggal Tiba)</strong></Label>
+            <Input
+              type="date"
+              name="eta_customer"
+              value={formData.eta_customer}
+              onChange={handleChange}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label><strong>Ship Method</strong></Label>
+            <Input
+              type="select"
+              name="ship_method"
+              value={formData.ship_method}
+              onChange={handleChange}
+              required
+            >
+              <option value="">-- Select --</option>
+              <option value="Sea">Sea</option>
+              <option value="Air">Air</option>
+            </Input>
+          </FormGroup>
+        </Form>
       </ModalBody>
+      <ModalFooter>
+        <Button color="primary" onClick={handleSaveAll}>
+          Save
+        </Button>
+      </ModalFooter>
     </Modal>
   );
 };
