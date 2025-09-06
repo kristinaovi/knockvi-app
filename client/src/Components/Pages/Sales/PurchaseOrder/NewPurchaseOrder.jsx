@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   ModalHeader,
@@ -10,23 +10,22 @@ import {
   Col,
   Label,
   FormGroup
-} from 'reactstrap'
-import Select from 'react-select'
-
+} from 'reactstrap';
+import Select from 'react-select';
 // Hooks
-import usePurchaseOrders from '../../../../Hooks/usePurchaseOrders'
-import usePurchaseOrderDetails from '../../../../Hooks/usePurchaseOrderDetails'
-import useParts from '../../../../Hooks/useParts'
+import usePurchaseOrders from '../../../../Hooks/usePurchaseOrders';
+import usePurchaseOrderDetails from '../../../../Hooks/usePurchaseOrderDetails';
+import useParts from '../../../../Hooks/useParts';
 
 const NewPurchaseOrder = ({ isOpen, toggle, onSaved }) => {
-  const { createOrUpdate: savePO } = usePurchaseOrders()
-  const { createOrUpdate: savePOD } = usePurchaseOrderDetails()
-  const { items: parts, fetchParts } = useParts()
+  const { createOrUpdate: savePO } = usePurchaseOrders();
+  const { createOrUpdate: savePOD } = usePurchaseOrderDetails();
+  const { items: parts, fetchParts } = useParts();
 
   // Load parts once
   useEffect(() => {
-    fetchParts()
-  }, [fetchParts])
+    fetchParts();
+  }, [fetchParts]);
 
   // === HEADER STATE ===
   const [poInfo, setPoInfo] = useState({
@@ -35,16 +34,16 @@ const NewPurchaseOrder = ({ isOpen, toggle, onSaved }) => {
     ppap_no: '',
     issuer_id: 1,
     requested_date: ''
-  })
+  });
 
   const handleHeaderChange = e => {
-    const { name, value } = e.target
-    setPoInfo(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setPoInfo(prev => ({ ...prev, [name]: value }));
+  };
 
   // === DETAIL STATE ===
-  const [tableData, setTableData] = useState([])
-  const [newRows, setNewRows] = useState([])
+  const [tableData, setTableData] = useState([]);
+  const [newRows, setNewRows] = useState([]);
 
   const startAddNewRow = () => {
     setNewRows(prev => [
@@ -56,67 +55,66 @@ const NewPurchaseOrder = ({ isOpen, toggle, onSaved }) => {
         PO_LINE: 0,
         QUANTITY: 0
       }
-    ])
-  }
+    ]);
+  };
 
   const handleNewRowChange = (index, e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setNewRows(prev => {
-      const updated = [...prev]
-      const row = { ...updated[index] }
-
+      const updated = [...prev];
+      const row = { ...updated[index] };
       row[name] =
         name === 'QUANTITY' || name === 'PO_LINE'
           ? parseInt(value) || 0
-          : value
-
+          : value;
       if (name === 'PART_CODE') {
-        const part = parts.find(p => p.id === parseInt(value))
-        row.PART_NAME = part ? part.name : ''
+        const part = parts.find(p => p.id === parseInt(value));
+        row.PART_NAME = part ? part.name : '';
       }
-
-      updated[index] = row
-      return updated
-    })
-  }
+      updated[index] = row;
+      return updated;
+    });
+  };
 
   const handleSaveAll = async () => {
     try {
-      let finalTableData = [...tableData, ...newRows]
+      // Convert empty requested_date to null to avoid MySQL error
+      const updatedPoInfo = {
+        ...poInfo,
+        requested_date: poInfo.requested_date || null
+      };
 
-      const { id: poId } = await savePO(poInfo)
-
+      let finalTableData = [...tableData, ...newRows];
+      const { id: poId } = await savePO(updatedPoInfo);
       await Promise.all(
         finalTableData.map(row =>
           savePOD({
             purchase_order_id: poId,
             part_id: row.PART_CODE,
-            request_date: row.REQUEST_DATE,
+            request_date: row.REQUEST_DATE || null,  // Also handle empty detail dates if needed
             line: row.PO_LINE,
             original_quantity: row.QUANTITY,
             price: 0
           })
         )
-      )
-
+      );
       // Reset states
-      setTableData([])
-      setNewRows([])
+      setTableData([]);
+      setNewRows([]);
       setPoInfo({
         no: '',
         pecgi_no: '',
         ppap_no: '',
         issuer_id: 1,
         requested_date: ''
-      })
-
-      if (onSaved) onSaved()
-      toggle()
+      });
+      if (onSaved) onSaved();
+      toggle();
     } catch (err) {
-      console.error(err)
-      alert('Failed to save purchase order')
+      console.error(err);
+      alert('Failed to save purchase order');
     }
-  }
+  };
 
   return (
     <Modal isOpen={isOpen} toggle={toggle} size="xl">
@@ -124,7 +122,18 @@ const NewPurchaseOrder = ({ isOpen, toggle, onSaved }) => {
       <ModalBody>
         {/* HEADER FORM */}
         <Row className="mb-4">
-          <Col md={6}>
+          <Col md={4}>
+            <FormGroup>
+              <Label>Requested Date</Label>
+              <Input
+                type="date"
+                name="requested_date"
+                value={poInfo.requested_date}
+                onChange={handleHeaderChange}
+              />
+            </FormGroup>
+          </Col>
+          <Col md={4}>
             <FormGroup>
               <Label>PECIG PO</Label>
               <Input
@@ -134,7 +143,7 @@ const NewPurchaseOrder = ({ isOpen, toggle, onSaved }) => {
               />
             </FormGroup>
           </Col>
-          <Col md={6}>
+          <Col md={4}>
             <FormGroup>
               <Label>PPAP PO</Label>
               <Input
@@ -145,7 +154,6 @@ const NewPurchaseOrder = ({ isOpen, toggle, onSaved }) => {
             </FormGroup>
           </Col>
         </Row>
-
         {/* DETAIL TABLE */}
         <div className="table-responsive">
           <Table bordered striped>
@@ -171,7 +179,6 @@ const NewPurchaseOrder = ({ isOpen, toggle, onSaved }) => {
                   <td>{item.QUANTITY}</td>
                 </tr>
               ))}
-
               {newRows.map((row, idx) => (
                 <tr key={`new-${idx}`}>
                   <td>
@@ -223,7 +230,6 @@ const NewPurchaseOrder = ({ isOpen, toggle, onSaved }) => {
                   </td>
                 </tr>
               ))}
-
               <tr>
                 <td colSpan="5" className="text-center">
                   <Button size="sm" color="primary" onClick={startAddNewRow}>
@@ -234,7 +240,6 @@ const NewPurchaseOrder = ({ isOpen, toggle, onSaved }) => {
             </tbody>
           </Table>
         </div>
-
         {/* SAVE ALL BUTTON */}
         <div className="d-flex justify-content-end mt-3">
           <Button color="primary" onClick={handleSaveAll}>
@@ -243,7 +248,7 @@ const NewPurchaseOrder = ({ isOpen, toggle, onSaved }) => {
         </div>
       </ModalBody>
     </Modal>
-  )
-}
+  );
+};
 
-export default NewPurchaseOrder
+export default NewPurchaseOrder;

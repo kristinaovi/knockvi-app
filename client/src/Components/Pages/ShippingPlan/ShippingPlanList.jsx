@@ -1,4 +1,3 @@
-// src/components/ShippingPlanList.jsx
 import React, { useState, useEffect } from "react";
 import {
   Card, CardBody, CardHeader, Button, Modal, ModalHeader, ModalBody,
@@ -10,10 +9,13 @@ import { H5 } from "../../../AbstractElements";
 import useShippingPlans from "../../../Hooks/useShippingPlans";
 import useShippingPlanDetail from "../../../Hooks/useShippingPlanDetail";
 import { Filter } from "react-feather";
+import useInvoices from "../../../Hooks/useInvoices";  // Import the invoices hook
+import Select from 'react-select';  // Import Select if not already in scope (add to imports if needed)
 
 const ShippingPlanList = () => {
   const { items: plans, fetchAll: fetchPlans, createOrUpdate: updatePlan } = useShippingPlans();
   const { items: details, fetchAll: fetchDetails, createOrUpdate: updateDetail } = useShippingPlanDetail();
+  const { items: invoices, fetchAll: fetchInvoices } = useInvoices();  // Use invoices hook
 
   const [filters, setFilters] = useState({
     shipID: "",
@@ -25,23 +27,31 @@ const ShippingPlanList = () => {
     invNo: "",
     shipStatus: "",
   });
-
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [editedPlan, setEditedPlan] = useState(null);
   const [editedDetails, setEditedDetails] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [usedInvoiceIds, setUsedInvoiceIds] = useState(new Set());  // Store used invoice IDs
 
   useEffect(() => {
     fetchPlans();
-  }, [fetchPlans]);
+    fetchInvoices();  // Fetch invoices on component mount
+  }, [fetchPlans, fetchInvoices]);
+
+  // Compute used invoice IDs from existing plans
+  useEffect(() => {
+    const usedIds = new Set(plans.map(p => p.invoice_id).filter(id => id));
+    setUsedInvoiceIds(usedIds);
+  }, [plans]);
 
   const toggleModal = (plan) => {
     if (plan) {
       const { issuer_email, ...cleanPlan } = plan;
       setSelectedPlan(plan);
-      setEditedPlan(cleanPlan);
+      // Ensure invoice_id is a number when initializing
+      setEditedPlan({ ...cleanPlan, invoice_id: Number(cleanPlan.invoice_id) || '' });
       fetchDetails({ shipping_plan_id: plan.id });
       setEditMode(false);
     } else {
@@ -62,12 +72,15 @@ const ShippingPlanList = () => {
     setEditedPlan((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleInvoiceChange = (opt) => {
+    setEditedPlan((prev) => ({ ...prev, invoice_id: opt ? opt.value : '' }));
+  };
+
   const handleDetailFieldChange = (index, field, value, row = null) => {
     console.log(row)
     setEditedDetails((prev) => {
       const updated = [...prev];
       let updatedRow = { ...updated[index], [field]: value };
-
       if (field === "actual_quantity") {
         const cartonQty = row?.part_pack_carton_quantity || 1;
         console.log(cartonQty, 'carton qty ygy')
@@ -80,7 +93,6 @@ const ShippingPlanList = () => {
           pallete
         };
       }
-
       updated[index] = updatedRow;
       return updated;
     });
@@ -88,7 +100,15 @@ const ShippingPlanList = () => {
 
   const handleSave = async () => {
     try {
-      await updatePlan(editedPlan);
+      // Sanitize date fields to YYYY-MM-DD before saving
+      const sanitizedPlan = {
+        ...editedPlan,
+        etd_nkb: editedPlan.etd_nkb ? editedPlan.etd_nkb.slice(0, 10) : null,
+        etd_cust: editedPlan.etd_cust ? editedPlan.etd_cust.slice(0, 10) : null
+      };
+      // Exclude auto-managed fields like created_at, updated_at, etc.
+      const { created_at, updated_at, created_by, updated_by, deleted_at, deleted_by, ...planToSave } = sanitizedPlan;
+      await updatePlan(planToSave);
       await Promise.all(
         editedDetails.map((d) =>
           updateDetail({
@@ -108,6 +128,12 @@ const ShippingPlanList = () => {
       console.error(err);
       alert("Failed to save updates");
     }
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    // If it's an ISO string, slice to YYYY-MM-DD
+    return dateStr.includes('T') ? dateStr.slice(0, 10) : dateStr;
   };
 
   const columns = [
@@ -150,7 +176,7 @@ const ShippingPlanList = () => {
     bookingID: p.booking_number,
     vesselID: p.vessel_name,
     contID: p.container_name,
-    invNo: p.invoice_id,
+    invNo: invoices.find(inv => inv.id === Number(p.invoice_id))?.invoice_number || '',
     shipStatus: p.status,
     openQty: p.open_qty ?? 0,
     __raw: p,
@@ -163,6 +189,14 @@ const ShippingPlanList = () => {
     )
   );
 
+  // Filter invoice options, excluding used ones (but include current when editing)
+  const availableInvoiceOptions = invoices
+    .filter(inv => !usedInvoiceIds.has(inv.id) || (editMode && inv.id === editedPlan?.invoice_id))
+    .map(inv => ({
+      value: inv.id,
+      label: inv.invoice_number
+    }));
+
   return (
     <Card>
       <CardHeader className="card-no-border d-flex justify-content-between align-items-center">
@@ -173,7 +207,6 @@ const ShippingPlanList = () => {
           size={18}
         />
       </CardHeader>
-
       <CardBody className="pt-0">
         {showFilters && (
           <Row className="mb-3">
@@ -182,9 +215,7 @@ const ShippingPlanList = () => {
             </Col>
           </Row>
         )}
-
         <DataTable columns={columns} data={filtered} striped pagination />
-
         <Modal isOpen={modalOpen} toggle={() => setModalOpen(false)} size="lg">
           <ModalHeader
             toggle={() => setModalOpen(false)}
@@ -199,7 +230,6 @@ const ShippingPlanList = () => {
               {editMode ? "Save" : "Edit"}
             </Button>
           </ModalHeader>
-
           <ModalBody>
             {editedPlan && (
               <div className="mb-3">
@@ -211,11 +241,11 @@ const ShippingPlanList = () => {
                       <Input
                         type="date"
                         name="etd_nkb"
-                        value={editedPlan.etd_nkb || ""}
+                        value={editedPlan.etd_nkb ? editedPlan.etd_nkb.slice(0, 10) : ""}
                         onChange={handlePlanFieldChange}
                       />
                     ) : (
-                      editedPlan.etd_nkb
+                      formatDate(editedPlan.etd_nkb)
                     )}
                   </Col>
                   <Col md={6}>
@@ -225,11 +255,11 @@ const ShippingPlanList = () => {
                       <Input
                         type="date"
                         name="etd_cust"
-                        value={editedPlan.etd_cust || ""}
+                        value={editedPlan.etd_cust ? editedPlan.etd_cust.slice(0, 10) : ""}
                         onChange={handlePlanFieldChange}
                       />
                     ) : (
-                      editedPlan.etd_cust
+                      formatDate(editedPlan.etd_cust)
                     )}
                   </Col>
                 </Row>
@@ -279,19 +309,27 @@ const ShippingPlanList = () => {
                     <strong>INVOICE NO.:</strong>
                     <br />
                     {editMode ? (
-                      <Input
-                        name="invoice_id"
-                        value={editedPlan.invoice_id || ""}
-                        onChange={handlePlanFieldChange}
+                      <Select
+                        options={availableInvoiceOptions}
+                        value={
+                          editedPlan.invoice_id
+                            ? {
+                                value: Number(editedPlan.invoice_id),
+                                label: invoices.find(inv => inv.id === Number(editedPlan.invoice_id))?.invoice_number || ''
+                              }
+                            : null
+                        }
+                        onChange={handleInvoiceChange}
+                        isClearable
+                        placeholder="Select an invoice..."
                       />
                     ) : (
-                      editedPlan.invoice_id
+                      invoices.find(inv => inv.id === Number(editedPlan.invoice_id))?.invoice_number || editedPlan.invoice_id
                     )}
                   </Col>
                 </Row>
               </div>
             )}
-
             <Table bordered responsive className="mt-4">
               <thead>
                 <tr>
@@ -346,5 +384,4 @@ const ShippingPlanList = () => {
     </Card>
   );
 };
-
 export default ShippingPlanList;
