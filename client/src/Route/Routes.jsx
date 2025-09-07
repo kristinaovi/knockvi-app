@@ -4,6 +4,7 @@ import Default from "../Components/Dashboard/Default";
 import Ecommerce from "../Components/Dashboard/Ecommerce";
 import OnlineCourse from "../Components/Dashboard/OnlineCourse";
 import Social from "../Components/Dashboard/Social";
+
 // sales
 import PurchaseOrder from "../Components/Pages/Sales/PurchaseOrder/PurchaseOrder";
 import Quotation from "../Components/Pages/Sales/Quotation/Quotation";
@@ -14,6 +15,7 @@ import TestRequest from "../Components/Pages/TestRequest/TestRequest";
 import ProductionPlan from "../Components/Pages/Production/ProductionPlan";
 import Inventory from "../Components/Pages/Inventory/Inventory";
 import Invoice from "../Components/Pages/Invoice/Invoice";
+import Profile from "../Components/Pages/Users/index";
 
 // //widgets
 import Chart from "../Components/Widgets/Chart";
@@ -277,6 +279,7 @@ export const routes = [
   { path: `${process.env.PUBLIC_URL}/production/:layout`, Component: <ProductionPlan /> },
   { path: `${process.env.PUBLIC_URL}/inventory/:layout`, Component: <Inventory /> },
   { path: `${process.env.PUBLIC_URL}/invoice/:layout`, Component: <Invoice /> },
+  { path: `${process.env.PUBLIC_URL}/profile/:layout`, Component: <Profile /> },
 
   // //Applicatiion
   { path: `${process.env.PUBLIC_URL}/app/project/project-list/:layout`, Component: <Project /> },

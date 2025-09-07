@@ -34,9 +34,9 @@ const Signin = ({ selected }) => {
   useEffect(() => {
     // initialize profile info
     localStorage.setItem("profileURL", man)
-    localStorage.setItem("Name", "Emay Walter")
+    localStorage.setItem("Name", "Novi Kristianti")
     setValue(man)
-    setName("Emay Walter")
+    setName("Novi Kristianti")
   }, [])
 
   const loginAuth = async e => {

@@ -2,14 +2,16 @@ export const MENUITEMS = [
   {
     menucontent: "Dashboards",
     Items: [
-    {  
-      title: "Dashboard",
-      icon: "home",
-      type: "sub",
-      badge: "badge badge-light-primary",
-      active: false,
-      path: `${process.env.PUBLIC_URL}/dashboard/default`, title: "Dashboard", type: "link"
-    },
+      {
+        title: "Dashboard",
+        icon: "home",
+        type: "sub",
+        badge: "badge badge-light-primary",
+        active: false,
+        path: `${process.env.PUBLIC_URL}/dashboard/default`,
+        title: "Dashboard",
+        type: "link",
+      },
     ],
   },
 
@@ -22,14 +24,18 @@ export const MENUITEMS = [
         type: "sub",
         badge: "badge badge-light-secondary",
         active: false,
-        path: `${process.env.PUBLIC_URL}/sales/purchase-order`, type: "link", title: "Purchase Order" },
+        path: `${process.env.PUBLIC_URL}/sales/purchase-order`,
+        type: "link",
+        title: "Purchase Order",
+      },
 
       {
         title: "Invoice",
         icon: "home",
         type: "sub",
         active: false,
-        path: `${process.env.PUBLIC_URL}/invoice`, type: "link"
+        path: `${process.env.PUBLIC_URL}/invoice`,
+        type: "link",
       },
 
       {
@@ -37,7 +43,8 @@ export const MENUITEMS = [
         icon: "ecommerce",
         type: "sub",
         active: false,
-        path: `${process.env.PUBLIC_URL}/shipping-plan`, type: "link"
+        path: `${process.env.PUBLIC_URL}/shipping-plan`,
+        type: "link",
       },
 
       {
@@ -46,7 +53,9 @@ export const MENUITEMS = [
         badge: "badge badge-light-secondary",
         type: "sub",
         active: false,
-        path: `${process.env.PUBLIC_URL}/production`, type: "link", title: "Production"
+        path: `${process.env.PUBLIC_URL}/production`,
+        type: "link",
+        title: "Production",
       },
 
       {
@@ -54,9 +63,18 @@ export const MENUITEMS = [
         icon: "chat",
         type: "sub",
         active: false,
-        path: `${process.env.PUBLIC_URL}/inventory`, type: "link"
+        path: `${process.env.PUBLIC_URL}/inventory`,
+        type: "link",
       },
-      
+
+      {
+        title: "User Management",
+        icon: "chat",
+        type: "sub",
+        active: false,
+        path: `${process.env.PUBLIC_URL}/user-management`,
+        type: "link",
+      },
     ],
   },
 ];

@@ -12,7 +12,7 @@ import CustInfoSummary from "./CustInfoSummary";
 const Dashboard = () => {
   return (
     <Fragment>
-      <Breadcrumbs mainTitle="Default" parent="Dashboard" title="Default" />
+      <Breadcrumbs mainTitle="Dashboard" parent="Dashboard" title="Default" />
       <Container fluid={true}>
         <Row className="widget-grid">
           <WidgetsWrapper />
@@ -24,16 +24,6 @@ const Dashboard = () => {
               <OrderOverview />
             </Col>
           </Row>
-
-          <Row className="g-3 mb-3">
-            <Col xl="6" md="8">
-              <CustInfoSummary />
-            </Col>
-            <Col xl="6" md="8">
-              <TestReqSummary />
-            </Col>
-          </Row>
-
           <ShippingSummary />
         </Row>
       </Container>

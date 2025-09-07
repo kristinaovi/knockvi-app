@@ -5,12 +5,12 @@ import man from "../../../assets/images/dashboard/profile.png";
 
 import { LI, UL, Image, P } from "../../../AbstractElements";
 import CustomizerContext from "../../../_helper/Customizer";
-import { Account, Admin, Inbox, LogOut, Taskboard } from "../../../Constant";
+import { Account, Admin, LogOut, } from "../../../Constant";
 
 const UserHeader = () => {
   const history = useNavigate();
   const [profile, setProfile] = useState("");
-  const [name, setName] = useState("Emay Walter");
+  const [name, setName] = useState("Novi Kristianti");
   const { layoutURL } = useContext(CustomizerContext);
   const authenticated = JSON.parse(localStorage.getItem("authenticated"));
   const auth0_profile = JSON.parse(localStorage.getItem("auth0_profile"));
@@ -53,24 +53,10 @@ const UserHeader = () => {
       <UL attrUL={{ className: "simple-list profile-dropdown onhover-show-div" }}>
         <LI
           attrLI={{
-            onClick: () => UserMenuRedirect(`${process.env.PUBLIC_URL}/app/users/profile/${layoutURL}`),
+            onClick: () => UserMenuRedirect(`${process.env.PUBLIC_URL}/profile/${layoutURL}`),
           }}>
           <User />
           <span>{Account} </span>
-        </LI>
-        <LI
-          attrLI={{
-            onClick: () => UserMenuRedirect(`${process.env.PUBLIC_URL}/app/email-app/${layoutURL}`),
-          }}>
-          <Mail />
-          <span>{Inbox}</span>
-        </LI>
-        <LI
-          attrLI={{
-            onClick: () => UserMenuRedirect(`${process.env.PUBLIC_URL}/app/todo-app/todo/${layoutURL}`),
-          }}>
-          <FileText />
-          <span>{Taskboard}</span>
         </LI>
         <LI attrLI={{ onClick: Logout }}>
           <LogIn />
