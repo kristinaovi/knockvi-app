@@ -16,6 +16,7 @@ import ProductionPlan from "../Components/Pages/Production/ProductionPlan";
 import Inventory from "../Components/Pages/Inventory/Inventory";
 import Invoice from "../Components/Pages/Invoice/Invoice";
 import Profile from "../Components/Pages/Users/index";
+import Users from "../Components/Pages/UserManagement/User";
 
 // //widgets
 import Chart from "../Components/Widgets/Chart";
@@ -280,6 +281,7 @@ export const routes = [
   { path: `${process.env.PUBLIC_URL}/inventory/:layout`, Component: <Inventory /> },
   { path: `${process.env.PUBLIC_URL}/invoice/:layout`, Component: <Invoice /> },
   { path: `${process.env.PUBLIC_URL}/profile/:layout`, Component: <Profile /> },
+  { path: `${process.env.PUBLIC_URL}/user-management/:layout`, Component: <Users /> },
 
   // //Applicatiion
   { path: `${process.env.PUBLIC_URL}/app/project/project-list/:layout`, Component: <Project /> },

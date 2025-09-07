@@ -113,7 +113,7 @@ const ProductionPlanList = () => {
   return (
     <Card>
       <CardHeader className="card-no-border d-flex justify-content-between align-items-center">
-        <H5 className="mb-0">Production Plan & Monitoring List</H5>
+        <H5 className="mb-0">Production List</H5>
         <Filter className="cursor-pointer" onClick={toggleFilter} size={18} />
       </CardHeader>
 

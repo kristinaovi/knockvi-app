@@ -54,8 +54,7 @@ const ProductionPlan = () => {
     <Fragment>
       <Breadcrumbs
         parent="Production"
-        title="Production Plan & Monitoring"
-        mainTitle="Production Plan & Monitoring"
+        mainTitle="Production"
       />
       <Container fluid={true}>
         <Row className="project-card">
