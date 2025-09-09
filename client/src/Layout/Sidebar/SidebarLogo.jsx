@@ -3,7 +3,7 @@ import { Grid } from "react-feather";
 import { Link } from "react-router-dom";
 import CustomizerContext from "../../_helper/Customizer";
 import { Image } from "../../AbstractElements";
-import CubaIcon from "../../assets/images/logo/logo.png";
+import CubaIcon from "../../assets/images/logo/KnockViLogo.png";
 
 const SidebarLogo = () => {
   const { mixLayout, toggleSidebar, toggleIcon, layout, layoutURL } = useContext(CustomizerContext);
@@ -22,7 +22,18 @@ const SidebarLogo = () => {
         </Link>
       ) : (
         <Link to={`${process.env.PUBLIC_URL}/dashboard/default/${layoutURL}`}>
-          <Image attrImage={{ className: "img-fluid d-inline", src: `${require("../../assets/images/logo/logo_dark.png")}`, alt: "" }} />
+<Image
+  attrImage={{
+    src: require("../../assets/images/logo/KnockViLogo.png"),
+    alt: "",
+    className: "d-inline",
+    style: {
+      maxWidth: "40px",
+      height: "auto",
+      objectFit: "contain",
+    },
+  }}
+/>
         </Link>
       )}
       <div className='back-btn' onClick={() => openCloseSidebar()}>

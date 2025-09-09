@@ -12,31 +12,21 @@ import {
   Label,
   Input,
 } from "reactstrap";
-import {
-  EditProfile,
-  Company,
-  Username,
-  UsersCountryMenu,
-  AboutMe,
-  UpdateProfile,
-  FirstName,
-  LastName,
-  Address,
-  EmailAddress,
-  PostalCode,
-  Country,
-  City,
-} from "../../../Constant";
+import { useChangePassword } from "../../../Hooks/useChangePassword"; // import hook
+import { toast } from "react-toastify";
 
 const EditMyProfile = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-  const onEditSubmit = (data) => {
-    alert(data);
-  };
+  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { changePassword, loading } = useChangePassword();
+
+const onEditSubmit = async (data) => {
+  console.log("Submitting form with:", data); // debug
+  if (data.NewPassword !== data.ConfirmNewPassword) {
+    return toast.error("New Password and Confirm Password must match");
+  }
+  await changePassword(data.OldPassword, data.NewPassword);
+};
+
   return (
     <Fragment>
       <Form className="card" onSubmit={handleSubmit(onEditSubmit)}>
@@ -52,61 +42,64 @@ const EditMyProfile = () => {
           </div>
         </CardHeader>
         <CardBody>
-          <Row>
-            <Row className="g-3 align-items-end">
-              <Col md="4">
-                <FormGroup>
-                  <Label className="form-label">Old Password</Label>
-                  <Input
-                    className="form-control"
-                    type="password"
-                    placeholder="********"
-                    {...register("OldPassword", { required: true })}
-                  />
-                  <span style={{ color: "red" }}>
-                    {errors.OldPassword && "Old Password is required"}
-                  </span>
-                </FormGroup>
-              </Col>
+          <Row className="g-3 align-items-end">
+            <Col md="4">
+              <FormGroup>
+                <Label className="form-label">Old Password</Label>
+                <Input
+                  className="form-control"
+                  type="password"
+                  placeholder="********"
+                  {...register("OldPassword", { required: true })}
+                />
+                <span style={{ color: "red" }}>
+                  {errors.OldPassword && "Old Password is required"}
+                </span>
+              </FormGroup>
+            </Col>
 
-              <Col md="4">
-                <FormGroup>
-                  <Label className="form-label">New Password</Label>
-                  <Input
-                    className="form-control"
-                    type="password"
-                    placeholder="********"
-                    {...register("NewPassword", { required: true })}
-                  />
-                  <span style={{ color: "red" }}>
-                    {errors.NewPassword && "New Password is required"}
-                  </span>
-                </FormGroup>
-              </Col>
+            <Col md="4">
+              <FormGroup>
+                <Label className="form-label">New Password</Label>
+                <Input
+                  className="form-control"
+                  type="password"
+                  placeholder="********"
+                  {...register("NewPassword", { required: true })}
+                />
+                <span style={{ color: "red" }}>
+                  {errors.NewPassword && "New Password is required"}
+                </span>
+              </FormGroup>
+            </Col>
 
-              <Col md="4">
-                <FormGroup>
-                  <Label className="form-label">Confirm New Password</Label>
-                  <Input
-                    className="form-control"
-                    type="password"
-                    placeholder="********"
-                    {...register("ConfirmNewPassword", { required: true })}
-                  />
-                  <span style={{ color: "red" }}>
-                    {errors.ConfirmNewPassword &&
-                      "Confirm New Password is required"}
-                  </span>
-                </FormGroup>
-              </Col>
-            </Row>
+            <Col md="4">
+              <FormGroup>
+                <Label className="form-label">Confirm New Password</Label>
+                <Input
+                  className="form-control"
+                  type="password"
+                  placeholder="********"
+                  {...register("ConfirmNewPassword", { required: true })}
+                />
+                <span style={{ color: "red" }}>
+                  {errors.ConfirmNewPassword &&
+                    "Confirm New Password is required"}
+                </span>
+              </FormGroup>
+            </Col>
           </Row>
         </CardBody>
         <CardFooter className="text-end">
-          <Btn attrBtn={{ color: "primary", type: "submit" }}>Save</Btn>
+          <Btn
+            attrBtn={{ color: "primary", type: "submit", disabled: loading }}
+          >
+            {loading ? "Saving..." : "Save"}
+          </Btn>
         </CardFooter>
       </Form>
     </Fragment>
   );
 };
+
 export default EditMyProfile;
