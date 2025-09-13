@@ -1,6 +1,6 @@
 // src/hooks/useChangePassword.js
 import { useState } from "react"; // <-- wajib ada
-import axios from "axios";        // <-- wajib ada
+import api from '../api/axios'
 import { toast } from "react-toastify"; // <-- wajib ada
 
 export function useChangePassword() {
@@ -13,7 +13,7 @@ export function useChangePassword() {
       const token = localStorage.getItem("token");
       console.log("Token ditemukan:", token); // Debugging
 
-      const res = await axios.put(
+      const res = await api.put(
         "/api/change-password", // pastikan sesuai backend route kamu
         { oldPassword, newPassword },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -23,7 +23,17 @@ export function useChangePassword() {
       return true;
     } catch (err) {
       console.error("Change password error:", err); // Debugging
-      toast.error(err.response?.data?.message || "Failed to change password");
+      if(err.response?.data?.errors) {
+        err.response?.data?.errors.map((item) => {
+          toast.error(
+            item.msg
+          )
+        })
+        
+      }
+      else {
+        toast.error(err.response?.data?.message || "Failed to change password");
+      }
       return false;
     } finally {
       setLoading(false);

@@ -1,6 +1,6 @@
 import React, { Fragment } from "react";
 import { Btn, H4 } from "../../../AbstractElements";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import {
   Row,
   Col,
@@ -12,20 +12,20 @@ import {
   Label,
   Input,
 } from "reactstrap";
-import { useChangePassword } from "../../../Hooks/useChangePassword"; // import hook
+import { useChangePassword } from "../../../Hooks/useChangePassword"; 
 import { toast } from "react-toastify";
 
 const EditMyProfile = () => {
-  const { register, handleSubmit} = useForm();
+  const { control, register, handleSubmit, formState: { errors } } = useForm();
   const { changePassword, loading } = useChangePassword();
 
-const onEditSubmit = async (data) => {
-  console.log("Submitting form with:", data); // debug
-  if (data.NewPassword !== data.ConfirmNewPassword) {
-    return toast.error("New Password and Confirm Password must match");
-  }
-  await changePassword(data.OldPassword, data.NewPassword);
-};
+  const onEditSubmit = async (data) => {
+    console.log("Submitting form with:", data); // debug
+    if (data.NewPassword !== data.ConfirmNewPassword) {
+      return toast.error("New Password and Confirm Password must match");
+    }
+    await changePassword(data.OldPassword, data.NewPassword);
+  };
 
   return (
     <Fragment>
@@ -43,39 +43,72 @@ const onEditSubmit = async (data) => {
         </CardHeader>
         <CardBody>
           <Row className="g-3 align-items-end">
+            {/* Old Password */}
             <Col md="4">
               <FormGroup>
                 <Label className="form-label">Old Password</Label>
-                <Input
-                  className="form-control"
-                  type="password"
-                  placeholder="********"
-                  {...register("OldPassword", { required: true })}
+                <Controller
+                  name="OldPassword"
+                  control={control}
+                  rules={{ required: "Old Password is required" }}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      type="password"
+                      className="form-control"
+                      placeholder="********"
+                    />
+                  )}
                 />
+                <span style={{ color: "red" }}>
+                  {errors.OldPassword?.message}
+                </span>
               </FormGroup>
             </Col>
 
+            {/* New Password */}
             <Col md="4">
               <FormGroup>
                 <Label className="form-label">New Password</Label>
-                <Input
-                  className="form-control"
-                  type="password"
-                  placeholder="********"
-                  {...register("NewPassword", { required: true })}
+                <Controller
+                  name="NewPassword"
+                  control={control}
+                  rules={{ required: "New Password is required" }}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      type="password"
+                      className="form-control"
+                      placeholder="********"
+                    />
+                  )}
                 />
+                <span style={{ color: "red" }}>
+                  {errors.NewPassword?.message}
+                </span>
               </FormGroup>
             </Col>
 
+            {/* Confirm New Password */}
             <Col md="4">
               <FormGroup>
                 <Label className="form-label">Confirm New Password</Label>
-                <Input
-                  className="form-control"
-                  type="password"
-                  placeholder="********"
-                  {...register("ConfirmNewPassword", { required: true })}
+                <Controller
+                  name="ConfirmNewPassword"
+                  control={control}
+                  rules={{ required: "Confirm New Password is required" }}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      type="password"
+                      className="form-control"
+                      placeholder="********"
+                    />
+                  )}
                 />
+                <span style={{ color: "red" }}>
+                  {errors.ConfirmNewPassword?.message}
+                </span>
               </FormGroup>
             </Col>
           </Row>
