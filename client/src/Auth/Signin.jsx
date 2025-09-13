@@ -49,6 +49,10 @@ const Signin = ({ selected }) => {
       localStorage.setItem("token", data.token)
       localStorage.setItem("login", "true")
 
+      localStorage.setItem("Name", data.user.name)
+      setValue(man)
+      setName(data.user.name)
+
       toast.success("Successfully logged in!")
       // redirect to dashboard
       navigate(`${process.env.PUBLIC_URL}/dashboard/default/${layoutURL}`)
