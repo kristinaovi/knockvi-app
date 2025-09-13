@@ -20,7 +20,7 @@ import api from "../api/axios"
 import man from "../assets/images/dashboard/profile.png"
 
 const Signin = ({ selected }) => {
-  const [email, setEmail] = useState("test@gmail.com")
+  const [email, setEmail] = useState("example@nissinjpn.co.jp")
   const [password, setPassword] = useState("test123")
   const [togglePassword, setTogglePassword] = useState(false)
   const navigate = useNavigate()
@@ -34,9 +34,9 @@ const Signin = ({ selected }) => {
   useEffect(() => {
     // initialize profile info
     localStorage.setItem("profileURL", man)
-    localStorage.setItem("Name", "Emay Walter")
+    localStorage.setItem("Name", "Novi Kristianti")
     setValue(man)
-    setName("Emay Walter")
+    setName("Novi Kristianti")
   }, [])
 
   const loginAuth = async e => {
@@ -48,6 +48,10 @@ const Signin = ({ selected }) => {
       // store JWT in localStorage
       localStorage.setItem("token", data.token)
       localStorage.setItem("login", "true")
+
+      localStorage.setItem("Name", data.user.name)
+      setValue(man)
+      setName(data.user.name)
 
       toast.success("Successfully logged in!")
       // redirect to dashboard
@@ -73,7 +77,7 @@ const Signin = ({ selected }) => {
                   <H4>
                     {selected === "simpleLogin"
                       ? ""
-                      : "Sign In With Simple Login"}
+                      : "Welcome"}
                   </H4>
                   <P>Enter your email &amp; password to login</P>
 
@@ -133,7 +137,6 @@ const Signin = ({ selected }) => {
                     </Btn>
                   </div>
 
-                  <OtherWay />
                 </Form>
               </div>
             </div>

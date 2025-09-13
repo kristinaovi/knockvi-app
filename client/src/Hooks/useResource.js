@@ -4,11 +4,12 @@ import api from '../api/axios'
 import { toast } from 'react-toastify'
 
 export default function useResource(resource) {
-  const [items, setItems]     = useState([])
-  const [item, setItem]       = useState(null)
+  const [items, setItems] = useState([])
+  const [item, setItem] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [error, setError]     = useState(null)
+  const [error, setError] = useState(null)
 
+  // Fetch all
   const fetchAll = useCallback(async (params = {}) => {
     setLoading(true)
     try {
@@ -28,6 +29,7 @@ export default function useResource(resource) {
     }
   }, [resource])
 
+  // Fetch one
   const fetchOne = useCallback(async id => {
     setLoading(true)
     try {
@@ -47,13 +49,56 @@ export default function useResource(resource) {
     }
   }, [resource])
 
+  // Create (khusus insert baru)
+  const create = useCallback(async data => {
+    try {
+      const res = await api.post(`/${resource}`, data)
+      toast.success(`${resource} created successfully`)
+      return res.data
+    } catch (err) {
+      if (err.response?.status === 422 && Array.isArray(err.response.data.errors)) {
+        err.response.data.errors.forEach(e =>
+          toast.error(`${e.path}: ${e.msg}`)
+        )
+      } else if (err.response?.data?.message) {
+        toast.error(err.response.data.message)
+      } else {
+        toast.error(err.message || `Failed to create ${resource}`)
+      }
+      throw err
+    }
+  }, [resource])
+
+  // Update (opsional)
+  const update = useCallback(async (id, data) => {
+    try {
+      const res = await api.put(`/${resource}/${id}`, data)
+      toast.success(`${resource} updated successfully`)
+      return res.data
+    } catch (err) {
+      if (err.response?.status === 422 && Array.isArray(err.response.data.errors)) {
+        err.response.data.errors.forEach(e =>
+          toast.error(`${e.path}: ${e.msg}`)
+        )
+      } else if (err.response?.data?.message) {
+        toast.error(err.response.data.message)
+      } else {
+        toast.error(err.message || `Failed to update ${resource}`)
+      }
+      throw err
+    }
+  }, [resource])
+
+  // Create or Update (opsional, untuk kompatibilitas lama)
   const createOrUpdate = useCallback(async data => {
     try {
       const res = await api.post(`/${resource}`, data)
       return res.data
     } catch (err) {
       if (err.response?.status === 422 && Array.isArray(err.response.data.errors)) {
-        err.response.data.errors.forEach(e => toast.error(`${e.path}: ${e.msg}`))
+        err.response.data.errors.forEach(e =>
+          toast.error(`${e.path}: ${e.msg}`)
+        )
       } else if (err.response?.data?.message) {
         toast.error(err.response.data.message)
       } else {
@@ -63,15 +108,18 @@ export default function useResource(resource) {
     }
   }, [resource])
 
+  // Delete
   const remove = useCallback(async id => {
     try {
       await api.delete(`/${resource}/${id}`)
+      toast.success(`${resource} deleted successfully`)
     } catch (err) {
       toast.error(err.message || `Failed to delete from ${resource}`)
       throw err
     }
   }, [resource])
 
+  // Export CSV
   const exportCsv = useCallback(async () => {
     try {
       const res = await api.get(`/${resource}/export/csv`, {
@@ -95,7 +143,9 @@ export default function useResource(resource) {
     error,
     fetchAll,
     fetchOne,
-    createOrUpdate,
+    create,          // <-- baru ditambahkan
+    update,          // <-- tambahan (jika perlu edit)
+    createOrUpdate,  // <-- tetap ada untuk kompatibilitas
     remove,
     exportCsv
   }

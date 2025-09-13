@@ -4,6 +4,7 @@ import Default from "../Components/Dashboard/Default";
 import Ecommerce from "../Components/Dashboard/Ecommerce";
 import OnlineCourse from "../Components/Dashboard/OnlineCourse";
 import Social from "../Components/Dashboard/Social";
+
 // sales
 import PurchaseOrder from "../Components/Pages/Sales/PurchaseOrder/PurchaseOrder";
 import Quotation from "../Components/Pages/Sales/Quotation/Quotation";
@@ -13,7 +14,9 @@ import ShippingPlan from "../Components/Pages/ShippingPlan/ShippingPlan";
 import TestRequest from "../Components/Pages/TestRequest/TestRequest";
 import ProductionPlan from "../Components/Pages/Production/ProductionPlan";
 import Inventory from "../Components/Pages/Inventory/Inventory";
-
+import Invoice from "../Components/Pages/Invoice/Invoice";
+import Profile from "../Components/Pages/Users/index";
+import Users from "../Components/Pages/UserManagement/User";
 
 // //widgets
 import Chart from "../Components/Widgets/Chart";
@@ -144,7 +147,6 @@ import Products from "../Components/Application/Ecommerce/Products";
 import ProductCart from "../Components/Application/Ecommerce/ProductCart";
 import WishList from "../Components/Application/Ecommerce/Wishlist";
 import CheckOut from "../Components/Application/Ecommerce/CheckOut";
-import Invoice from "../Components/Application/Ecommerce/Invoice";
 import OrderHistory from "../Components/Application/Ecommerce/OrderHistory";
 import ProductPage from "../Components/Application/Ecommerce/ProductPage";
 import PricingMemberShip from "../Components/Application/Ecommerce/PricingMemberShip";
@@ -277,6 +279,9 @@ export const routes = [
   { path: `${process.env.PUBLIC_URL}/test-request/:layout`, Component: <TestRequest /> },
   { path: `${process.env.PUBLIC_URL}/production/:layout`, Component: <ProductionPlan /> },
   { path: `${process.env.PUBLIC_URL}/inventory/:layout`, Component: <Inventory /> },
+  { path: `${process.env.PUBLIC_URL}/invoice/:layout`, Component: <Invoice /> },
+  { path: `${process.env.PUBLIC_URL}/profile/:layout`, Component: <Profile /> },
+  { path: `${process.env.PUBLIC_URL}/user-management/:layout`, Component: <Users /> },
 
   // //Applicatiion
   { path: `${process.env.PUBLIC_URL}/app/project/project-list/:layout`, Component: <Project /> },
@@ -304,7 +309,6 @@ export const routes = [
   { path: `${process.env.PUBLIC_URL}/app/ecommerce/payment-details/:layout`, Component: <PaymentDetails /> },
   { path: `${process.env.PUBLIC_URL}/app/ecommerce/orderhistory/:layout`, Component: <OrderHistory /> },
   { path: `${process.env.PUBLIC_URL}/app/ecommerce/pricing/:layout`, Component: <PricingMemberShip /> },
-  { path: `${process.env.PUBLIC_URL}/app/ecommerce/invoice/:layout`, Component: <Invoice /> },
   { path: `${process.env.PUBLIC_URL}/app/ecommerce/cart/:layout`, Component: <ProductCart /> },
   { path: `${process.env.PUBLIC_URL}/app/ecommerce/wishlist/:layout`, Component: <WishList /> },
   { path: `${process.env.PUBLIC_URL}/app/ecommerce/checkout/:layout`, Component: <CheckOut /> },

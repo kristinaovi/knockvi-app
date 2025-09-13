@@ -1,7 +1,7 @@
 import React, { Fragment, useState } from 'react';
 import { Card, CardBody, CardHeader, Collapse, Media, UncontrolledTooltip } from 'reactstrap';
 import { Btn, H5, H6, Image, LI, UL } from '../../../../AbstractElements';
-import { Likes, Messages, MyPage, MyProfile, Notification, View } from '../../../../Constant';
+import { Likes, Messages, MyPage, Notification, View } from '../../../../Constant';
 import { customersData } from '../../../../Data/SocialHeader';
 import one from '../../../../assets/images/user/1.jpg';
 import { ChevronDown, ChevronUp } from 'react-feather';
@@ -14,7 +14,7 @@ const MyProfileClass = () => {
         <CardHeader>
           <H5 attrH5={{ className: 'mb-0' }}>
             <Btn attrBtn={{ className: 'd-flex justify-content-between', color: 'link', onClick: () => setisProfile(!isProfile) }}>
-              {MyProfile}
+              My Pofile
               {isProfile ? <ChevronUp className='m-0' /> : <ChevronDown className='m-0' />}
             </Btn>
           </H5>

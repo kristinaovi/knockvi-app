@@ -1,5 +1,4 @@
-// src/components/NewPurchaseOrder.jsx
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   ModalHeader,
@@ -11,128 +10,130 @@ import {
   Col,
   Label,
   FormGroup
-} from 'reactstrap'
+} from 'reactstrap';
 import Select from 'react-select';
-
 // Hooks
-import usePurchaseOrders from '../../../../Hooks/usePurchaseOrders'
-import usePurchaseOrderDetails from '../../../../Hooks/usePurchaseOrderDetails'
-import useParts from '../../../../Hooks/useParts'
+import usePurchaseOrders from '../../../../Hooks/usePurchaseOrders';
+import usePurchaseOrderDetails from '../../../../Hooks/usePurchaseOrderDetails';
+import useParts from '../../../../Hooks/useParts';
 
-const NewPurchaseOrder = ({ isOpen, toggle }) => {
-  const { createOrUpdate: savePO } = usePurchaseOrders()
-  const { createOrUpdate: savePOD } = usePurchaseOrderDetails()
-  const { items: parts, fetchParts } = useParts()
+const NewPurchaseOrder = ({ isOpen, toggle, onSaved }) => {
+  const { createOrUpdate: savePO } = usePurchaseOrders();
+  const { createOrUpdate: savePOD } = usePurchaseOrderDetails();
+  const { items: parts, fetchParts } = useParts();
 
   // Load parts once
   useEffect(() => {
-    fetchParts()
-  }, [fetchParts])
+    fetchParts();
+  }, [fetchParts]);
 
-  // === HEADER STATE & HANDLER ===
+  // === HEADER STATE ===
   const [poInfo, setPoInfo] = useState({
     no: '',
     pecgi_no: '',
     ppap_no: '',
     issuer_id: 1,
-    requested_date: '',
-  })
+    requested_date: ''
+  });
 
   const handleHeaderChange = e => {
-    const { name, value } = e.target
-    setPoInfo(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setPoInfo(prev => ({ ...prev, [name]: value }));
+  };
 
-  // === DETAIL STATE & HANDLERS ===
-  const [newRow, setNewRow] = useState(null)
-  const [tableData, setTableData] = useState([])
+  // === DETAIL STATE ===
+  const [tableData, setTableData] = useState([]);
+  const [newRows, setNewRows] = useState([]);
 
-  const startAddNewRow = () =>
-    setNewRow({
-      PART_CODE: '',
-      PART_NAME: '',
-      REQUEST_DATE: '',
-      PO_LINE: 0,
-      QUANTITY: 0
-    })
-  const cancelNewRow = () => setNewRow(null)
-
-  const handleNewRowChange = e => {
-    const { name, value } = e.target
-    setNewRow(prev => {
-      const next = {
-        ...prev,
-        [name]:
-          name === 'QUANTITY' || name === 'PO_LINE'
-            ? parseInt(value) || 0
-            : value
+  const startAddNewRow = () => {
+    setNewRows(prev => [
+      ...prev,
+      {
+        PART_CODE: '',
+        PART_NAME: '',
+        REQUEST_DATE: '',
+        PO_LINE: 0,
+        QUANTITY: 0
       }
-      // auto‑fill PART_NAME on code select
+    ]);
+  };
+
+  const handleNewRowChange = (index, e) => {
+    const { name, value } = e.target;
+    setNewRows(prev => {
+      const updated = [...prev];
+      const row = { ...updated[index] };
+      row[name] =
+        name === 'QUANTITY' || name === 'PO_LINE'
+          ? parseInt(value) || 0
+          : value;
       if (name === 'PART_CODE') {
-        const part = parts.find(p => p.id === parseInt(value))
-        next.PART_NAME = part ? part.name : ''
+        const part = parts.find(p => p.id === parseInt(value));
+        row.PART_NAME = part ? part.name : '';
       }
-      return next
-    })
-  }
+      updated[index] = row;
+      return updated;
+    });
+  };
 
-  const saveNewRow = () => {
-    if (!newRow.PART_CODE) {
-      alert('Please select a part')
-      return
-    }
-    setTableData([...tableData, newRow])
-    setNewRow(null)
-  }
-
-  // === SAVE ALL ===
   const handleSaveAll = async () => {
     try {
-      // 1) Save PO header
-      const { id: poId } = await savePO(poInfo)
+      // Convert empty requested_date to null to avoid MySQL error
+      const updatedPoInfo = {
+        ...poInfo,
+        requested_date: poInfo.requested_date || null
+      };
 
-      // 2) Save each detail row
+      let finalTableData = [...tableData, ...newRows];
+      const { id: poId } = await savePO(updatedPoInfo);
       await Promise.all(
-        tableData.map(row =>
+        finalTableData.map(row =>
           savePOD({
             purchase_order_id: poId,
             part_id: row.PART_CODE,
-            request_date: row.REQUEST_DATE,
+            request_date: row.REQUEST_DATE || null,  // Also handle empty detail dates if needed
             line: row.PO_LINE,
             original_quantity: row.QUANTITY,
             price: 0
           })
         )
-      )
-
-      // reset & close
-      setTableData([])
-      setPoInfo({ no: '', pecgi_no: '', ppap_no: '', issuer_id: 1, requested_date: '' })
-      toggle()
+      );
+      // Reset states
+      setTableData([]);
+      setNewRows([]);
+      setPoInfo({
+        no: '',
+        pecgi_no: '',
+        ppap_no: '',
+        issuer_id: 1,
+        requested_date: ''
+      });
+      if (onSaved) onSaved();
+      toggle();
     } catch (err) {
-      console.error(err)
-      alert('Failed to save purchase order')
+      console.error(err);
+      alert('Failed to save purchase order');
     }
-  }
+  };
 
   return (
     <Modal isOpen={isOpen} toggle={toggle} size="xl">
       <ModalHeader toggle={toggle}>Add New Purchase Order</ModalHeader>
       <ModalBody>
-
         {/* HEADER FORM */}
-        <Row form className="mb-4">
-          <Col md={3}>
+        <Row className="mb-4">
+          <Col md={4}>
             <FormGroup>
-              <Label>PO Number</Label>
+              <Label>Requested Date</Label>
               <Input
-                name="no"
-                value={poInfo.no}
+                type="date"
+                name="requested_date"
+                value={poInfo.requested_date}
                 onChange={handleHeaderChange}
               />
             </FormGroup>
           </Col>
-          <Col md={3}>
+          <Col md={4}>
             <FormGroup>
               <Label>PECIG PO</Label>
               <Input
@@ -142,7 +143,7 @@ const NewPurchaseOrder = ({ isOpen, toggle }) => {
               />
             </FormGroup>
           </Col>
-          <Col md={3}>
+          <Col md={4}>
             <FormGroup>
               <Label>PPAP PO</Label>
               <Input
@@ -152,26 +153,7 @@ const NewPurchaseOrder = ({ isOpen, toggle }) => {
               />
             </FormGroup>
           </Col>
-          <Col md={3}>
-            <FormGroup>
-              {/* <Label>Issuer ID</Label>
-              <Input
-                type="number"
-                name="issuer_id"
-                value={poInfo.issuer_id}
-                onChange={handleHeaderChange}
-              /> */}
-              <Label>Requested Date</Label>
-              <Input
-                type="date"
-                name="requested_date"
-                value={poInfo.requested_date || ''}
-                onChange={handleHeaderChange}
-              />
-            </FormGroup>
-          </Col>
         </Row>
-
         {/* DETAIL TABLE */}
         <div className="table-responsive">
           <Table bordered striped>
@@ -182,12 +164,11 @@ const NewPurchaseOrder = ({ isOpen, toggle }) => {
                 <th>REQUEST DATE</th>
                 <th>PO LINE</th>
                 <th>QUANTITY</th>
-                {/* <th></th>  */}
               </tr>
             </thead>
             <tbody>
               {tableData.map((item, idx) => (
-                <tr key={idx}>
+                <tr key={`saved-${idx}`}>
                   <td>
                     {parts.find(p => p.id === item.PART_CODE)?.code ||
                       item.PART_CODE}
@@ -196,78 +177,61 @@ const NewPurchaseOrder = ({ isOpen, toggle }) => {
                   <td>{item.REQUEST_DATE}</td>
                   <td>{item.PO_LINE}</td>
                   <td>{item.QUANTITY}</td>
-                  <td>{/* optional delete btn */}</td>
                 </tr>
               ))}
-
-              {newRow && (
-                <tr>
+              {newRows.map((row, idx) => (
+                <tr key={`new-${idx}`}>
                   <td>
-                  <Select
-                      options={parts.map(p => ({ value: p.id, label: `${p.code} - ${p.name}` }))}
+                    <Select
+                      options={parts.map(p => ({
+                        value: p.id,
+                        label: `${p.code} - ${p.name}`
+                      }))}
                       value={
                         parts
-                          .filter(p => p.id === newRow.PART_CODE)
-                          .map(p => ({ value: p.id, label: p.code }))[0] 
-                          || null
+                          .filter(p => p.id === row.PART_CODE)
+                          .map(p => ({ value: p.id, label: p.code }))[0] ||
+                        null
                       }
                       onChange={opt =>
-                        handleNewRowChange({
+                        handleNewRowChange(idx, {
                           target: { name: 'PART_CODE', value: opt.value }
                         })
                       }
                       name="PART_CODE"
-                      className="js-example-basic-single"
                     />
                   </td>
                   <td>
-                    <Input readOnly value={newRow.PART_NAME} />
+                    <Input readOnly value={row.PART_NAME} />
                   </td>
                   <td>
                     <Input
                       type="date"
                       name="REQUEST_DATE"
-                      value={newRow.REQUEST_DATE}
-                      onChange={handleNewRowChange}
+                      value={row.REQUEST_DATE}
+                      onChange={e => handleNewRowChange(idx, e)}
                     />
                   </td>
                   <td>
                     <Input
                       type="number"
                       name="PO_LINE"
-                      value={newRow.PO_LINE}
-                      onChange={handleNewRowChange}
+                      value={row.PO_LINE}
+                      onChange={e => handleNewRowChange(idx, e)}
                     />
                   </td>
                   <td>
                     <Input
                       type="number"
                       name="QUANTITY"
-                      value={newRow.QUANTITY}
-                      onChange={handleNewRowChange}
+                      value={row.QUANTITY}
+                      onChange={e => handleNewRowChange(idx, e)}
                     />
                   </td>
-                  {/* <td>
-                    <Button
-                      color="success"
-                      size="sm"
-                      onClick={saveNewRow}
-                    >
-                      Save
-                    </Button>{' '}
-                    <Button
-                      color="danger"
-                      size="sm"
-                      onClick={cancelNewRow}
-                    >
-                      Cancel
-                    </Button>
-                  </td> */}
                 </tr>
-              )}
-
+              ))}
               <tr>
-                <td colSpan="6" className="text-center">
+                <td colSpan="5" className="text-center">
                   <Button size="sm" color="primary" onClick={startAddNewRow}>
                     + Add Row
                   </Button>
@@ -276,7 +240,6 @@ const NewPurchaseOrder = ({ isOpen, toggle }) => {
             </tbody>
           </Table>
         </div>
-
         {/* SAVE ALL BUTTON */}
         <div className="d-flex justify-content-end mt-3">
           <Button color="primary" onClick={handleSaveAll}>
@@ -285,7 +248,7 @@ const NewPurchaseOrder = ({ isOpen, toggle }) => {
         </div>
       </ModalBody>
     </Modal>
-  )
-}
+  );
+};
 
-export default NewPurchaseOrder
+export default NewPurchaseOrder;
