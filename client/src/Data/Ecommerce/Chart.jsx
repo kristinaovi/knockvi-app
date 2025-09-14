@@ -173,9 +173,9 @@ export const OrderThisMonthChart = {
 
 // Profit  Monthly //
 export const MonthlyProfitsChartData = {
-  series: [30, 55, 35, 100, 50],
+  series: [0, 0, 0], // hanya 3 data
   options: {
-    labels: ["CAP", "CASE", "RING", "DI CAN", "SPACER"],
+    labels: ["CAP", "CASE", "RING"], // label disesuaikan
     chart: {
       type: "pie",
       height: 300,
@@ -244,7 +244,7 @@ export const MonthlyProfitsChartData = {
         },
       },
     },
-    colors: ["#FF0000", "#007BFF", "#28A745", "#FFC107", "#6C757D"], 
+    colors: ["#FF0000", "#007BFF", "#28A745"], // hanya 3 warna
     responsive: [
       {
         breakpoint: 1630,
@@ -298,23 +298,23 @@ export const MonthlyProfitsChartData = {
   },
 };
 
-// Over Chart Option ///
+
 export const OptionsOverView = {
   series: [
     {
       name: "Production",
       type: "area",
-      data: [44, 55, 35, 50, 67, 50],
+      data: [], // kosong
     },
     {
       name: "Order",
       type: "area",
-      data: [35, 30, 23, 40, 50, 35],
+      data: [], // kosong
     },
     {
       name: "Shipping",
       type: "area",
-      data: [25, 20, 15, 25, 32, 20],
+      data: [], // kosong
     },
   ],
   options: {
@@ -373,74 +373,7 @@ export const OptionsOverView = {
     },
     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov"],
     markers: {
-      discrete: [
-        {
-          seriesIndex: 0,
-          dataPointIndex: 2,
-          fillColor: "#7064F5",
-          strokeColor: "var(--white)",
-          size: 5,
-          sizeOffset: 3,
-        },
-        {
-          seriesIndex: 1,
-          dataPointIndex: 2,
-          fillColor: "#54BA4A",
-          strokeColor: "var(--white)",
-          size: 5,
-        },
-        {
-          seriesIndex: 2,
-          dataPointIndex: 2,
-          fillColor: "#FF3364",
-          strokeColor: "var(--white)",
-          size: 5,
-        },
-        {
-          seriesIndex: 0,
-          dataPointIndex: 5,
-          fillColor: "#7064F5",
-          strokeColor: "var(--white)",
-          size: 5,
-          sizeOffset: 3,
-        },
-        {
-          seriesIndex: 1,
-          dataPointIndex: 5,
-          fillColor: "#54BA4A",
-          strokeColor: "var(--white)",
-          size: 5,
-        },
-        {
-          seriesIndex: 2,
-          dataPointIndex: 5,
-          fillColor: "#FF3364",
-          strokeColor: "var(--white)",
-          size: 5,
-        },
-        {
-          seriesIndex: 0,
-          dataPointIndex: 9,
-          fillColor: "#7064F5",
-          strokeColor: "var(--white)",
-          size: 5,
-          sizeOffset: 3,
-        },
-        {
-          seriesIndex: 1,
-          dataPointIndex: 9,
-          fillColor: "#54BA4A",
-          strokeColor: "var(--white)",
-          size: 5,
-        },
-        {
-          seriesIndex: 2,
-          dataPointIndex: 9,
-          fillColor: "#FF3364",
-          strokeColor: "var(--white)",
-          size: 5,
-        },
-      ],
+      discrete: [], // kosongkan marker juga
       hover: {
         size: 5,
         sizeOffset: 0,
@@ -490,7 +423,7 @@ export const OptionsOverViewBarChart = {
   series: [
     {
       name: "Revenue",
-      data: [30, 40, 18, 25, 18, 10],
+      data: [], // kosong
     },
   ],
   options: {
@@ -578,6 +511,7 @@ export const OptionsOverViewBarChart = {
     ],
   },
 };
+
 
 // Visitor Chart //
 export const OptionsVisitorChart = {

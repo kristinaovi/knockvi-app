@@ -1,6 +1,4 @@
-// src/components/ProductionPlanList.jsx
-import React, { useState } from "react";
-import { prodData as initialProdData } from "../../../Data/Production";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardBody,
@@ -10,96 +8,180 @@ import {
   Modal,
   ModalHeader,
   ModalBody,
-  ModalFooter,
   Table,
-  Button,
+  Form,
+  FormGroup,
   Input,
+  Button,
 } from "reactstrap";
 import DataTable from "react-data-table-component";
 import { H5 } from "../../../AbstractElements";
 import TableColumnFilter from "../../Filter/TableColumnFilter";
 import { Filter } from "react-feather";
-
-// Kolom tabel utama
-const prodColumns = (onClickProdID) => [
-  {
-    name: "Part ID",
-    selector: (row) => row.prodID,
-    cell: (row) => (
-      <button
-        className="btn btn-link p-0 text-primary"
-        onClick={() => onClickProdID(row)}
-      >
-        {row.prodID}
-      </button>
-    ),
-    sortable: true,
-  },
-  { name: "Part Name", selector: (row) => row.prodName, sortable: true },
-  { name: "Machine", selector: (row) => row.prodMC, sortable: true },
-  { name: "Qty Plan", selector: (row) => row.prodPlan, sortable: true },
-  { name: "Total Output", selector: (row) => row.prodOutput, sortable: true },
-  { name: "MC Status", selector: (row) => row.prodMCStatus, sortable: true },
-  { name: "Status", selector: (row) => row.prodStatus, sortable: true },
-  { name: "Remark", selector: (row) => row.prodRemark, sortable: false },
-];
+import useProductionPlan from "../../../Hooks/useProductionPlan";
+import useProductionProcess from "../../../Hooks/useProductionProcess";
+import useParts from "../../../Hooks/useParts";
+import useMachines from "../../../Hooks/useMachines";
+import axios from "axios";
 
 const ProductionPlanList = () => {
-  const [prodList, setProdList] = useState(initialProdData);
-  const [filters, setFilters] = useState({
-    prodID: "",
-    prodName: "",
-    prodMC: "",
-    prodPlan: "",
-    prodOutput: "",
-    prodMCStatus: "",
-    prodStatus: "",
-    prodRemark: "",
-  });
+  const { items: productionPlans, fetchAll: fetchProductionPlans } =
+    useProductionPlan();
+  const { items: parts, fetchParts: fetchPartsAll } = useParts();
+  const { items: machines, fetchAll: fetchMachinesAll } = useMachines();
 
+  const [prodList, setProdList] = useState([]);
+  const [filters, setFilters] = useState({});
   const [showFilters, setShowFilters] = useState(false);
-  const toggleFilter = () => setShowFilters((prev) => !prev);
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedProdRow, setSelectedProdRow] = useState(null);
-  const [editedProd, setEditedProd] = useState(null);
-  const [isEditMode, setIsEditMode] = useState(false);
-
-  // Dummy data history
-  const [historyOutputDummy, setHistoryOutputDummy] = useState([
-    { tanggal: "2025-08-01", output1: 100, output2: 200 },
-    { tanggal: "2025-08-02", output1: 150, output2: 250 },
-  ]);
-
-  const toggleModal = (row) => {
-    setSelectedProdRow(row);
-    setEditedProd({ ...row });
-    setIsEditMode(false);
-    setModalOpen(true);
+  // Save draft row (confirm before adding row officially)
+  const saveDraftRow = (index) => {
+    alert(`Row ${index + 1} disimpan sementara`);
   };
 
-  const handleUpdate = () => {
-    // Hitung total output dari history
-    const totalOutput = historyOutputDummy.reduce(
-      (acc, row) => acc + Number(row.output1) + Number(row.output2),
-      0
-    );
+  // Cancel new row
+  const cancelNewRow = (index) => {
+    setNewRows((prev) => prev.filter((_, i) => i !== index));
+  };
 
-    const updatedRow = {
-      ...editedProd,
-      prodOutput: totalOutput, // simpan hasil perhitungan ke row
-    };
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [formData, setFormData] = useState({});
+  const [tableData, setTableData] = useState([]);
+  const [newRows, setNewRows] = useState([]);
 
-    // Update prodList agar DataTable ikut berubah
-    setProdList((prevList) =>
-      prevList.map((item) =>
-        item.prodID === editedProd.prodID ? updatedRow : item
-      )
-    );
+  // Fetch all data initially
+  useEffect(() => {
+    fetchPartsAll();
+    fetchMachinesAll();
+    fetchProductionPlans();
+  }, [fetchPartsAll, fetchMachinesAll, fetchProductionPlans]);
 
-    setSelectedProdRow(updatedRow);
-    setIsEditMode(false);
-    setModalOpen(false);
+  useEffect(() => {
+    const mapped = productionPlans.map((p) => {
+      const part = parts.find((x) => x.id === p.part_id);
+      const machine = machines.find((x) => x.id === p.machine_id);
+      return {
+        ...p,
+        part_name: part ? part.name : "",
+        machine_name: machine ? machine.name : "",
+      };
+    });
+    setProdList(mapped);
+  }, [productionPlans, parts, machines]);
+
+  const toggleFilter = () => setShowFilters((prev) => !prev);
+
+  // Modal toggle
+  const toggleModal = async (plan = null) => {
+    if (plan) {
+      setSelectedPlan(plan);
+      setFormData({
+        quantity_plan: plan.quantity_plan,
+        quantity_actual: plan.quantity_actual || 0,
+        remarks: plan.remarks || "",
+        machine_no: plan.machine_no || "",
+        machine_status: plan.machine_status || "",
+      });
+      setEditMode(false);
+
+      // Fetch tableData / history
+      try {
+        const res = await axios.get(`/production_process/${plan.id}`);
+        setTableData(res.data || []);
+      } catch (err) {
+        console.error(err);
+        setTableData([]);
+      }
+      setNewRows([]);
+    } else {
+      setSelectedPlan(null);
+      setTableData([]);
+      setNewRows([]);
+    }
+    setModalOpen((prev) => !prev);
+  };
+
+  // Handle input changes for new rows
+  const handleNewRowChange = (index, e) => {
+    const { name, value } = e.target;
+    setNewRows((prev) => {
+      const updated = [...prev];
+      updated[index][name] = value;
+      return updated;
+    });
+  };
+
+  const startAddNewRow = () => {
+    setNewRows((prev) => [
+      ...prev,
+      {
+        date: "",
+        output_1: "",
+        output_2: "",
+      },
+    ]);
+  };
+
+const handleSave = async () => {
+  if (!selectedPlan) return;
+
+  // 🔹 definisikan planId
+  const planId = selectedPlan.id;
+
+  // 🔹 siapkan data untuk plan
+  const planData = {
+    part_id: selectedPlan.part_id,
+    machine_id: formData.machine_id || selectedPlan.machine_id,
+    status: formData.status || selectedPlan.status,
+    quantity_plan: formData.quantity_plan || selectedPlan.quantity_plan,
+    remarks: formData.remarks || selectedPlan.remarks,
+  };
+
+  // 🔹 siapkan data untuk process
+  const processData = [
+    ...tableData, // data lama
+    ...newRows.map((row) => ({
+      ...row,
+      production_plan_id: selectedPlan.id,
+      output_1: Number(row.output_1) || 0,
+      output_2: Number(row.output_2) || 0,
+    })),
+  ];
+
+  try {
+    await fetch(`/production_plan/save-both/${planId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ planData, processData }),
+    });
+
+    alert("Data berhasil disimpan!");
+    toggleModal();
+    fetchProductionPlans();
+    setNewRows([]);
+    setEditMode(false);
+  } catch (err) {
+    console.error(err);
+    alert("Gagal simpan data!");
+  }
+};
+
+
+
+  const handleDelete = async () => {
+    if (!window.confirm("Apakah Anda yakin ingin menghapus data ini?")) return;
+    try {
+      await axios.delete(`/production_process/${selectedPlan.id}`);
+      alert("Data berhasil dihapus!");
+      toggleModal(null);
+      fetchProductionPlans();
+    } catch (err) {
+      console.error(err);
+      alert("Gagal menghapus data!");
+    }
   };
 
   const filteredData = prodList.filter((item) =>
@@ -110,14 +192,48 @@ const ProductionPlanList = () => {
     )
   );
 
+  const columns = [
+    {
+      name: "Production ID",
+      selector: (row) => row.id,
+      sortable: true,
+      cell: (row) => (
+        <button
+          className="btn btn-link p-0 text-primary"
+          onClick={() => toggleModal(row)}
+        >
+          {row.part_id}
+        </button>
+      ),
+    },
+    { name: "Part ID", selector: (row) => row.part_id, sortable: true },
+    { name: "Part Name", selector: (row) => row.part_name, sortable: true },
+    {
+      name: "Machine No.",
+      selector: (row) => row.machine_name,
+      sortable: true,
+    },
+    {
+      name: "Quantity Plan",
+      selector: (row) => row.quantity_plan,
+      sortable: true,
+    },
+    {
+      name: "Quantity Actual",
+      selector: (row) => row.quantity_actual || 0,
+      sortable: true,
+    },
+    { name: "Status", selector: (row) => row.status, sortable: true },
+    { name: "Remarks", selector: (row) => row.remarks, sortable: false },
+  ];
+
   return (
     <Card>
-      <CardHeader className="card-no-border d-flex justify-content-between align-items-center">
-        <H5 className="mb-0">Production List</H5>
-        <Filter className="cursor-pointer" onClick={toggleFilter} size={18} />
+      <CardHeader className="d-flex justify-content-between">
+        <H5>Production List</H5>
+        <Filter className="cursor-pointer" onClick={toggleFilter} />
       </CardHeader>
-
-      <CardBody className="pt-0">
+      <CardBody>
         {showFilters && (
           <Row className="mb-3">
             <Col>
@@ -127,249 +243,256 @@ const ProductionPlanList = () => {
         )}
 
         <DataTable
-          columns={prodColumns(toggleModal)}
+          columns={columns}
           data={filteredData}
-          striped
-          center
           pagination
+          striped
           noDataComponent="No records found"
         />
 
-        {/* Modal Detail */}
-        <Modal isOpen={modalOpen} toggle={() => setModalOpen(false)} size="lg">
-          <ModalHeader
-            toggle={() => setModalOpen(false)}
-            className="position-relative pe-5"
-          >
-            {selectedProdRow?.prodID} - Details
+        {/* Modal */}
+        <Modal isOpen={modalOpen} toggle={() => toggleModal(null)} size="lg">
+          <ModalHeader toggle={() => toggleModal(null)}>
+            {selectedPlan?.part_id} - Detail
           </ModalHeader>
-
           <ModalBody>
-            {editedProd && (
-              <div className="mb-3">
+            {selectedPlan && (
+              <Form>
                 <Row className="mb-2">
                   <Col md={6}>
-                    <strong>Part Name:</strong>
-                    <br />
-                    {isEditMode ? (
-                      <Input
-                        value={editedProd.prodName}
-                        onChange={(e) =>
-                          setEditedProd({
-                            ...editedProd,
-                            prodName: e.target.value,
-                          })
-                        }
-                      />
-                    ) : (
-                      selectedProdRow.prodName
-                    )}
+                    <FormGroup>
+                      <strong>Part ID :</strong>
+                      <br />
+                      {selectedPlan.part_id}
+                    </FormGroup>
                   </Col>
                   <Col md={6}>
-                    <strong>Machine:</strong>
-                    <br />
-                    {isEditMode ? (
-                      <Input
-                        value={editedProd.prodMC}
-                        onChange={(e) =>
-                          setEditedProd({
-                            ...editedProd,
-                            prodMC: e.target.value,
-                          })
-                        }
-                      />
-                    ) : (
-                      selectedProdRow.prodMC
-                    )}
+                    <FormGroup>
+                      <strong>Part Name :</strong>
+                      <br />
+                      {selectedPlan.part_name}
+                    </FormGroup>
                   </Col>
                 </Row>
 
-                <Row>
+                <Row className="mb-2">
                   <Col md={6}>
-                    <strong>Qty Plan:</strong>
-                    <br />
-                    {isEditMode ? (
-                      <Input
-                        type="number"
-                        value={editedProd.prodPlan}
-                        onChange={(e) =>
-                          setEditedProd({
-                            ...editedProd,
-                            prodPlan: e.target.value,
-                          })
-                        }
-                      />
-                    ) : (
-                      selectedProdRow.prodPlan
-                    )}
+                    <FormGroup>
+                      <strong>Machine No. :</strong>
+                      <br />
+                      {editMode ? (
+                        <Input
+                          type="select"
+                          value={
+                            formData.machine_id || selectedPlan.machine_id || ""
+                          }
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              machine_id: e.target.value,
+                            })
+                          }
+                        >
+                          <option value="">-- Select Machine --</option>
+                          {machines.map((m) => (
+                            <option key={m.id} value={m.id}>
+                              {m.name}
+                            </option>
+                          ))}
+                        </Input>
+                      ) : (
+                        selectedPlan.machine_name
+                      )}
+                    </FormGroup>
                   </Col>
+
                   <Col md={6}>
-                    <strong>MC Status:</strong>
-                    <br />
-                    {isEditMode ? (
-                      <Input
-                        type="select"
-                        value={editedProd.prodMCStatus}
-                        onChange={(e) =>
-                          setEditedProd({
-                            ...editedProd,
-                            prodMCStatus: e.target.value,
-                          })
-                        }
-                      >
-                        <option>Running</option>
-                        <option>Setting</option>
-                        <option>Repair</option>
-                        <option>Stop</option>
-                      </Input>
-                    ) : (
-                      selectedProdRow.prodMCStatus
-                    )}
+                    <FormGroup>
+                      <strong>Machine Status :</strong>
+                      <br />
+                      {editMode ? (
+                        <Input
+                          type="select"
+                          value={formData.status || selectedPlan.status || ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              status: e.target.value,
+                            })
+                          }
+                        >
+                          <option value="">-- Select Status --</option>
+                          <option value="Setting">Setting</option>
+                          <option value="Repair">Repair</option>
+                          <option value="Running">Running</option>
+                        </Input>
+                      ) : (
+                        selectedPlan.status
+                      )}
+                    </FormGroup>
                   </Col>
                 </Row>
-              </div>
+
+                <Row className="mb-2">
+                  <Col md={6}>
+                    <FormGroup>
+                      <strong>Quantity Plan :</strong>
+                      <br />
+                      {editMode ? (
+                        <Input
+                          type="number"
+                          value={formData.quantity_plan}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              quantity_plan: e.target.value,
+                            })
+                          }
+                        />
+                      ) : (
+                        selectedPlan.quantity_plan
+                      )}
+                    </FormGroup>
+                  </Col>
+
+                  <Col md={6}>
+                    <FormGroup>
+                      <strong>Remark :</strong>
+                      <br />
+                      {editMode ? (
+                        <Input
+                          type="text"
+                          value={formData.remarks || ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              remarks: e.target.value,
+                            })
+                          }
+                        />
+                      ) : (
+                        selectedPlan.remarks
+                      )}
+                    </FormGroup>
+                  </Col>
+                </Row>
+              </Form>
             )}
 
-            {/* History Output Table */}
-            <Table bordered responsive>
-              <thead>
-                <tr>
-                  <th>Tanggal</th>
-                  <th>Output 1</th>
-                  <th>Output 2</th>
-                  <th>Total Output</th>
-                  {isEditMode && <th>Action</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {historyOutputDummy.map((row, index) => {
-                  const total = Number(row.output1) + Number(row.output2);
-                  return (
-                    <tr key={index}>
+            {/* Table */}
+            <div className="table-responsive mt-3">
+              <Table bordered striped>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Output Shift 1</th>
+                    <th>Output Shift 2</th>
+                    <th>Total</th>
+                    {editMode && <th>Action</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {tableData.map((item, idx) => (
+                    <tr key={`saved-${idx}`}>
+                      <td>{item.date}</td>
+                      <td>{item.output_1}</td>
+                      <td>{item.output_2}</td>
                       <td>
-                        {isEditMode ? (
-                          <Input
-                            type="date"
-                            value={row.tanggal}
-                            onChange={(e) => {
-                              const newHistory = [...historyOutputDummy];
-                              newHistory[index].tanggal = e.target.value;
-                              setHistoryOutputDummy(newHistory);
-                            }}
-                          />
-                        ) : (
-                          row.tanggal
-                        )}
+                        {(Number(item.output_1) || 0) +
+                          (Number(item.output_2) || 0)}
                       </td>
-                      <td>
-                        {isEditMode ? (
-                          <Input
-                            type="number"
-                            value={row.output1}
-                            onChange={(e) => {
-                              const newHistory = [...historyOutputDummy];
-                              newHistory[index].output1 = Number(
-                                e.target.value
-                              );
-                              setHistoryOutputDummy(newHistory);
-                            }}
-                          />
-                        ) : (
-                          row.output1.toLocaleString()
-                        )}
-                      </td>
-                      <td>
-                        {isEditMode ? (
-                          <Input
-                            type="number"
-                            value={row.output2}
-                            onChange={(e) => {
-                              const newHistory = [...historyOutputDummy];
-                              newHistory[index].output2 = Number(
-                                e.target.value
-                              );
-                              setHistoryOutputDummy(newHistory);
-                            }}
-                          />
-                        ) : (
-                          row.output2.toLocaleString()
-                        )}
-                      </td>
-                      <td>{total.toLocaleString()}</td>
+                    </tr>
+                  ))}
 
-                      {isEditMode && (
-                        <td className="text-center">
+                  {newRows.map((row, idx) => (
+                    <tr key={`new-${idx}`}>
+                      <td>
+                        <Input
+                          type="date"
+                          name="date"
+                          value={row.date}
+                          onChange={(e) => handleNewRowChange(idx, e)}
+                        />
+                      </td>
+                      <td>
+                        <Input
+                          type="number"
+                          name="output_1"
+                          value={row.output_1}
+                          onChange={(e) => handleNewRowChange(idx, e)}
+                        />
+                      </td>
+                      <td>
+                        <Input
+                          type="number"
+                          name="output_2"
+                          value={row.output_2}
+                          onChange={(e) => handleNewRowChange(idx, e)}
+                        />
+                      </td>
+                      <td>
+                        <Input
+                          readOnly
+                          value={
+                            (Number(row.output_1) || 0) +
+                            (Number(row.output_2) || 0)
+                          }
+                        />
+                      </td>
+                      {editMode && (
+                        <td>
                           <Button
-                            color=""
+                            color="success"
                             size="sm"
-                            onClick={() => {
-                              const newHistory = historyOutputDummy.filter(
-                                (_, i) => i !== index
-                              );
-                              setHistoryOutputDummy(newHistory);
-                            }}
+                            onClick={() => saveDraftRow(idx)}
                           >
-                            ❌
+                            ✓
+                          </Button>{" "}
+                          <Button
+                            color="danger"
+                            size="sm"
+                            onClick={() => cancelNewRow(idx)}
+                          >
+                            ×
                           </Button>
                         </td>
                       )}
                     </tr>
-                  );
-                })}
+                  ))}
 
-                <tr className="fw-bold">
-                  <td colSpan="3" className="text-end">
-                    Grand Total
-                  </td>
-                  <td>
-                    {historyOutputDummy
-                      .reduce(
-                        (acc, row) =>
-                          acc + Number(row.output1) + Number(row.output2),
-                        0
-                      )
-                      .toLocaleString()}
-                  </td>
-                  {isEditMode && <td></td>}
-                </tr>
+                  {editMode && (
+                    <tr>
+                      <td colSpan="5" className="text-center">
+                        <Button size="sm" color="primary" onClick={startAddNewRow}>
+                          + Add Row
+                        </Button>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+            </div>
 
-                {isEditMode && (
-                  <tr>
-                    <td
-                      colSpan={isEditMode ? "5" : "4"}
-                      className="text-center"
-                    >
-                      <Button
-                        color="primary"
-                        onClick={() =>
-                          setHistoryOutputDummy([
-                            ...historyOutputDummy,
-                            { tanggal: "", output1: 0, output2: 0 },
-                          ])
-                        }
-                      >
-                        + Add Row
-                      </Button>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </Table>
-          </ModalBody>
-
-          <ModalFooter className="d-flex justify-content-end mt-2">
-            {isEditMode && (
-              <Button color="success" onClick={handleUpdate}>
-                Update
+            <div className="d-flex justify-content-end mt-3 gap-2">
+              {editMode ? (
+                <Button color="success" onClick={handleSave}>
+                  Save
+                </Button>
+              ) : (
+                <Button color="primary" onClick={() => setEditMode(true)}>
+                  Edit
+                </Button>
+              )}
+              <Button color="danger" onClick={handleDelete}>
+                Hapus
               </Button>
-            )}
-            <Button
-              color={isEditMode ? "secondary" : "primary"}
-              onClick={() => setIsEditMode(!isEditMode)}
-            >
-              {isEditMode ? "Cancel Edit" : "Edit"}
-            </Button>
-          </ModalFooter>
+              {editMode && (
+                <Button color="secondary" onClick={() => setEditMode(false)}>
+                  Cancel
+                </Button>
+              )}
+            </div>
+          </ModalBody>
         </Modal>
       </CardBody>
     </Card>

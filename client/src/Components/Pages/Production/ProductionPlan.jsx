@@ -1,3 +1,4 @@
+// src/Components/Pages/Production/ProductionPlan.jsx
 import React, { Fragment, useContext, useState } from "react";
 import {
   Container,
@@ -7,15 +8,7 @@ import {
   Nav,
   NavItem,
   NavLink,
-  Modal,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Form,
-  FormGroup,
-  Label,
-  Input,
+  Button
 } from "reactstrap";
 import { Target, Info, CheckCircle, PlusCircle } from "react-feather";
 import { Closed, All, Open, Add } from "../../../Constant";
@@ -23,6 +16,7 @@ import { Breadcrumbs } from "../../../AbstractElements";
 import ProjectContext from "../../../_helper/Project/index";
 import CustomizerContext from "../../../_helper/Customizer";
 import ProductionPlanList from "./ProductionPlanList";
+import NewProductionPlan from "./NewProductionPlan";
 
 const ProductionPlan = () => {
   const { layoutURL } = useContext(CustomizerContext);
@@ -33,29 +27,9 @@ const ProductionPlan = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const toggleModal = () => setModalOpen(!modalOpen);
 
-  const [formData, setFormData] = useState({
-    prodName: "",
-    prodMC: "",
-    prodOutput: "",
-  });
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSave = () => {
-    console.log("Saving data:", formData);
-    // TODO: Panggil API ke backend (POST /api/production-plans)
-    toggleModal();
-    setFormData({ prodName: "", prodMC: "", prodOutput: "" });
-  };
-
   return (
     <Fragment>
-      <Breadcrumbs
-        parent="Production"
-        mainTitle="Production"
-      />
+      <Breadcrumbs parent="Production" mainTitle="Production" />
       <Container fluid={true}>
         <Row className="project-card">
           <Col md="12" className="project-list">
@@ -96,7 +70,7 @@ const ProductionPlan = () => {
                   <div className="text-end">
                     <button
                       className="btn btn-primary me-2"
-                      onClick={toggleModal}
+                      onClick={toggleModal} // ✅ Panggil fungsi toggle
                     >
                       <PlusCircle /> {Add}
                     </button>
@@ -114,51 +88,14 @@ const ProductionPlan = () => {
       </Container>
 
       {/* Modal Add Production Plan */}
-      <Modal isOpen={modalOpen} toggle={toggleModal}>
-        <ModalHeader toggle={toggleModal}>Add Production Plan</ModalHeader>
-        <ModalBody>
-          <Form>
-            <FormGroup>
-              <Label for="prodName">Production Name</Label>
-              <Input
-                type="text"
-                id="prodName"
-                name="prodName"
-                value={formData.prodName}
-                onChange={handleChange}
-              />
-            </FormGroup>
-            <FormGroup>
-              <Label for="prodMC">Machine</Label>
-              <Input
-                type="text"
-                id="prodMC"
-                name="prodMC"
-                value={formData.prodMC}
-                onChange={handleChange}
-              />
-            </FormGroup>
-            <FormGroup>
-              <Label for="prodOutput">Output</Label>
-              <Input
-                type="number"
-                id="prodOutput"
-                name="prodOutput"
-                value={formData.prodOutput}
-                onChange={handleChange}
-              />
-            </FormGroup>
-          </Form>
-        </ModalBody>
-        <ModalFooter>
-          <Button color="secondary" onClick={toggleModal}>
-            Cancel
-          </Button>
-          <Button color="primary" onClick={handleSave}>
-            Save
-          </Button>
-        </ModalFooter>
-      </Modal>
+      <NewProductionPlan
+        isOpen={modalOpen}
+        toggle={toggleModal}
+        onSuccess={() => {
+          // Di sini bisa dipanggil ulang API list jika perlu
+          console.log("Production Plan added successfully!");
+        }}
+      />
     </Fragment>
   );
 };

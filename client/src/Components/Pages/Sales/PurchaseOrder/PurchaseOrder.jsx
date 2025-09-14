@@ -36,7 +36,6 @@ const PurchaseOrder = () => {
                 <Col md="6">
                   <div className="text-end">
                     <button className="btn btn-primary me-2" onClick={toggleModal}><PlusCircle /> {Add}</button>
-                    <button className="btn btn-primary" style={{ color: 'white' }} onClick={toggleUploadModal}><PlusCircle /> {Upload}</button>
                   </div>
                 </Col>
               </Row>
@@ -48,7 +47,6 @@ const PurchaseOrder = () => {
           
         </Row>
 
-      <UploadPurchaseOrder isOpen={uploadModalOpen} toggle={toggleUploadModal} />
       <NewPurchaseOrder isOpen={modalOpen} toggle={toggleModal} />
       </Container>
     </Fragment>

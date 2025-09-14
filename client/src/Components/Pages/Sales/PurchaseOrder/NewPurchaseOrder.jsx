@@ -122,20 +122,9 @@ const NewPurchaseOrder = ({ isOpen, toggle, onSaved }) => {
       <ModalBody>
         {/* HEADER FORM */}
         <Row className="mb-4">
-          <Col md={4}>
+          <Col md={6}>
             <FormGroup>
-              <Label>Requested Date</Label>
-              <Input
-                type="date"
-                name="requested_date"
-                value={poInfo.requested_date}
-                onChange={handleHeaderChange}
-              />
-            </FormGroup>
-          </Col>
-          <Col md={4}>
-            <FormGroup>
-              <Label>PECIG PO</Label>
+              <Label>PECGI PO</Label>
               <Input
                 name="pecgi_no"
                 value={poInfo.pecgi_no}
@@ -143,7 +132,7 @@ const NewPurchaseOrder = ({ isOpen, toggle, onSaved }) => {
               />
             </FormGroup>
           </Col>
-          <Col md={4}>
+          <Col md={6}>
             <FormGroup>
               <Label>PPAP PO</Label>
               <Input
@@ -243,7 +232,7 @@ const NewPurchaseOrder = ({ isOpen, toggle, onSaved }) => {
         {/* SAVE ALL BUTTON */}
         <div className="d-flex justify-content-end mt-3">
           <Button color="primary" onClick={handleSaveAll}>
-            SAVE PURCHASE ORDER
+            SAVE
           </Button>
         </div>
       </ModalBody>

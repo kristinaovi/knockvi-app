@@ -150,12 +150,12 @@ const ShippingPlanList = () => {
     },
     { name: "ETD NKB", selector: (row) => row.etdNKB, sortable: true },
     { name: "ETA CUST", selector: (row) => row.etaCust, sortable: true },
-    { name: "BOOKING NO.", selector: (row) => row.bookingID, sortable: true },
-    { name: "VESSEL", selector: (row) => row.vesselID, sortable: true },
-    { name: "CONTAINER", selector: (row) => row.contID, sortable: true },
-    { name: "INVOICE NO.", selector: (row) => row.invNo, sortable: true },
+    { name: "Booking No.", selector: (row) => row.bookingID, sortable: true },
+    { name: "Vessel", selector: (row) => row.vesselID, sortable: true },
+    { name: "Container", selector: (row) => row.contID, sortable: true },
+    { name: "Invoiice No.", selector: (row) => row.invNo, sortable: true },
     {
-      name: "STATUS",
+      name: "Status",
       selector: (row) => row.shipStatus,
       sortable: true,
       cell: (row) => {

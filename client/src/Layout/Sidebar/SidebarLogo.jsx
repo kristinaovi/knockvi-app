@@ -1,48 +1,52 @@
 import React, { useContext } from "react";
-import { Grid } from "react-feather";
 import { Link } from "react-router-dom";
 import CustomizerContext from "../../_helper/Customizer";
 import { Image } from "../../AbstractElements";
 import CubaIcon from "../../assets/images/logo/KnockViLogo.png";
 
 const SidebarLogo = () => {
-  const { mixLayout, toggleSidebar, toggleIcon, layout, layoutURL } = useContext(CustomizerContext);
-
-  const openCloseSidebar = () => {
-    toggleSidebar(!toggleIcon);
-  };
+  const { mixLayout, layout, layoutURL } = useContext(CustomizerContext);
 
   const layout1 = localStorage.getItem("sidebar_layout") || layout;
 
   return (
-    <div className='logo-wrapper'>
-      {layout1 !== "compact-wrapper dark-sidebar" && layout1 !== "compact-wrapper color-sidebar" && mixLayout ? (
-        <Link to={`${process.env.PUBLIC_URL}/dashboard/default/${layoutURL}`}>
-          <Image attrImage={{ className: "img-fluid d-inline", src: `${CubaIcon}`, alt: "" }} />
-        </Link>
-      ) : (
-        <Link to={`${process.env.PUBLIC_URL}/dashboard/default/${layoutURL}`}>
-<Image
-  attrImage={{
-    src: require("../../assets/images/logo/KnockViLogo.png"),
-    alt: "",
-    className: "d-inline",
-    style: {
-      maxWidth: "40px",
-      height: "auto",
-      objectFit: "contain",
-    },
+<div
+  className="logo-wrapper"
+  style={{
+    borderRight: "1px solid #fff", // garis putih
+    padding: "10px 15px", // jarak dari tepi
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "#fff", // sesuaikan dengan warna sidebar jika perlu
   }}
-/>
-        </Link>
-      )}
-      <div className='back-btn' onClick={() => openCloseSidebar()}>
-        <i className='fa fa-angle-left'></i>
-      </div>
-      <div className='toggle-sidebar' onClick={openCloseSidebar}>
-        <Grid className='status_toggle middle sidebar-toggle' />
-      </div>
-    </div>
+>
+  {layout1 !== "compact-wrapper dark-sidebar" &&
+  layout1 !== "compact-wrapper color-sidebar" &&
+  mixLayout ? (
+    <Link to={`${process.env.PUBLIC_URL}/dashboard/default/${layoutURL}`}>
+      <Image
+        attrImage={{ className: "img-fluid d-inline", src: `${CubaIcon}`, alt: "" }}
+      />
+    </Link>
+  ) : (
+    <Link to={`${process.env.PUBLIC_URL}/dashboard/default/${layoutURL}`}>
+      <Image
+        attrImage={{
+          src: require("../../assets/images/logo/KnockViLogo.png"),
+          alt: "",
+          className: "d-inline",
+          style: {
+            maxWidth: "40px",
+            height: "auto",
+            objectFit: "contain",
+          },
+        }}
+      />
+    </Link>
+  )}
+</div>
+
   );
 };
 

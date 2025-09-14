@@ -248,6 +248,7 @@ const InvoiceList = () => {
                     <th>QTY Plan</th>
                     <th>QTY Actual</th>
                     <th>Price</th>
+                    <th>Amount</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -259,6 +260,7 @@ const InvoiceList = () => {
                       <td>{d.original_quantity}</td>
                       <td>{d.actual_quantity}</td>
                       <td>{d.price ?? 0}</td>
+                      <td>{Number(d.price) * Number(d.actual_quantity)}</td>
                     </tr>
                   ))}
                 </tbody>

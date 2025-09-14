@@ -1,5 +1,6 @@
-import useResource from './useResource'
+// Hooks/useProductionPlan.js
+import useResource from './useResource';
 
 export default function useProductionPlan() {
-  return useResource('production_plan')
+  return useResource('production_plan');
 }

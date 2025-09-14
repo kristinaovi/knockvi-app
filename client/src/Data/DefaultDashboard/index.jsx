@@ -1,4 +1,5 @@
 import { Widgets2ChartData, Widgets2ChartData2, Widgets2ChartData2Widgets, Widgets2ChartDataWidgets } from './Chart';
+import { Package, Factory, Truck } from "lucide-react";
 
 export const WidgetsData = {
   title: 'Total Order',
@@ -101,23 +102,25 @@ export const LightCardData = [
     price: '$8,475',
   },
 ];
+
+
 export const LightCardData2 = [
   {
-    title: 'Orders',
-    icon: 'orders',
-    price: '10,098',
-    color: 'success',
+    title: "Order",
+    icon: <Package size={24} color="#FF0000" />, // hijau
+    price: "0",
+    color: "success",
   },
   {
-    title: 'Production',
-    icon: 'expense',
-    price: '$12,057',
-    color: 'danger',
+    title: "Production",
+    icon: <Factory size={24} color="#007BFF" />, // merah
+    price: "0",
+    color: "danger",
   },
   {
-    title: 'Shipping',
-    icon: 'doller-return',
-    price: '3,001',
+    title: "Shipping",
+    icon: <Truck size={24} color="#28A745" />, // biru
+    price: "0",
   },
 ];
 

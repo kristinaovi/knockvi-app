@@ -10,7 +10,7 @@ import { Filter } from "react-feather"; // ✅ Tambah import
 
 const inventoryColumns = (onClickProdID) => [
   {
-    name: 'PART CODE',
+    name: 'Part Code',
     selector: row => row.partID,
     cell: row => (
       <button
@@ -22,17 +22,19 @@ const inventoryColumns = (onClickProdID) => [
     ),
     sortable: true,
   },
-  { name: 'PART NAME', selector: row => row.partName, sortable: true },
-  { name: 'FINISH GOOD', selector: row => row.finishStock, sortable: true },
-  { name: 'CARTON', selector: row => row.ctnStock, sortable: true },
-  { name: 'PALLETE', selector: row => row.pltStock, sortable: true },
-  { name: 'REMARK', selector: row => row.remarkStock, sortable: false },
+  { name: 'Part Name', selector: row => row.partName, sortable: true },
+  { name: 'Total Stock', selector: row => row.partTotal, sortable: true },
+  { name: 'Finish Good', selector: row => row.finishStock, sortable: true },
+  { name: 'Cartom', selector: row => row.ctnStock, sortable: true },
+  { name: 'Pallete', selector: row => row.pltStock, sortable: true },
+  { name: 'Remark', selector: row => row.remarkStock, sortable: false },
 ];
 
 const InventoryList = () => {
   const [filters, setFilters] = useState({
     partID: '',
     partName: '',
+    partTotal: '',
     finishStock: '',
     remarkStock: '',
   });

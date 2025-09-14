@@ -1,25 +1,23 @@
-import React from 'react';
-
-import { H6 } from '../../../AbstractElements';
-import { DailyDropdown } from '../../../Constant';
-import SvgIcon from '../../Common/Component/SvgIcon';
-import DropdownCommon from '../../Common/Dropdown';
+// LightCardBox.jsx
+import React from "react";
+import { Card, CardBody } from "reactstrap";
 
 const LightCardBox = ({ data }) => {
   return (
-    <div className='light-card balance-card widget-hover'>
-      <div className='svg-box'>
-        <SvgIcon className='svg-fill' iconId={data.icon} />
-      </div>
-      <div>
-        <span className='f-light'>{data.title}</span>
-        <H6 attrH6={{ className: 'mt-1 mb-0' }}>{data.price}</H6>
-      </div>
-      <div className='ms-auto text-end'>
-        <DropdownCommon dropdownMain={{ className: 'icon-dropdown', direction: 'start' }} options={DailyDropdown} iconName='icon-more-alt' btn={{ tag: 'span' }} />
-        {data.gros && <span className={`d-inline-block mt-1 font-${data.color}`}>{data.gros}</span>}
-      </div>
-    </div>
+    <Card className="light-card p-2"> {/* tambah p-2 biar lebih compact */}
+      <CardBody className="d-flex align-items-center gap-2 py-2 px-2">
+        {/* Icon */}
+        <div className="icon-wrapper">
+          {data.icon}
+        </div>
+
+        {/* Title & Value */}
+        <div>
+          <h6 className="mb-0" style={{ fontSize: "0.8rem" }}>{data.title}</h6>
+          <h5 className="mb-0" style={{ fontSize: "1rem" }}>{data.price}</h5>
+        </div>
+      </CardBody>
+    </Card>
   );
 };
 

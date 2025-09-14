@@ -1,7 +1,6 @@
 import React, { Fragment, useState, useEffect, useContext } from "react";
 import CustomContext from "../../_helper/Customizer";
 import { MENUITEMS } from "./Menu";
-import SidebarIcon from "./SidebarIcon";
 import SidebarLogo from "./SidebarLogo";
 import SidebarMenu from "./SidebarMenu";
 
@@ -117,7 +116,6 @@ const Sidebar = (props) => {
           closeOverlay();
         }}></div>
       <div className={`sidebar-wrapper ${toggleIcon ? "close_icon" : ""}`} sidebar-layout="stroke-svg">
-        <SidebarIcon />
         <SidebarLogo />
         {/* sidebartoogle={sidebartoogle} */}
         <SidebarMenu setMainMenu={setMainMenu} props={props} setNavActive={setNavActive} activeClass={activeClass} width={width} />

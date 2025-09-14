@@ -82142,4 +82142,18 @@ rect {
   }
 }
 
+.equal-card {
+  display: flex;
+  align-items: stretch;
+}
+
+.equal-card > .col {
+  display: flex;
+}
+
+.equal-card .card {
+  flex: 1;
+}
+
+
 /*====todo css end====*/ /*# sourceMappingURL=index.css.map */

@@ -1,5 +1,6 @@
-// File: src/components/PurchaseOrderList.jsx
+// File: src/components/Pages/Sales/PurchaseOrder/PurchaseOrderList.jsx
 import React, { useState, useEffect } from "react";
+import { useMemo } from "react";
 import usePurchaseOrderDetails from "../../../../Hooks/usePurchaseOrderDetails";
 import {
   Card,
@@ -12,12 +13,16 @@ import {
   Row,
   Col,
   Button,
+  Form,
+  FormGroup,
+  Input,
 } from "reactstrap";
+import axios from '../../../../api/axios'
 import DataTable from "react-data-table-component";
 import TableColumnFilter from "../../../Filter/TableColumnFilter";
 import { PurchaseOrderTittle } from "../../../../Constant";
 import { H5 } from "../../../../AbstractElements";
-import { Filter } from "react-feather"; // ⬅️ import filter icon
+import { Filter } from "react-feather"; // import icon filter
 
 // define your table columns
 const poColumns = (onClickRow) => [
@@ -41,23 +46,19 @@ const poColumns = (onClickRow) => [
   { name: "PO LINE", selector: (r) => r.poLine, sortable: true },
   { name: "ISSUED QTY", selector: (r) => r.issuedQty, sortable: true },
   { name: "OPEN QTY", selector: (r) => r.openQty, sortable: true },
-{
-  name: "Status",
-  cell: (row) => {
-    const status = row.openQty > 0 ? "Open" : "Closed";
-    return (
-      <span
-        style={{
-          color: status === "Closed" ? "green" : "red",
-          fontWeight: "bold",
-        }}
-      >
-        {status}
-      </span>
-    );
+  {
+    name: "STATUS",
+    selector: (row) => row.statusQty,
+    sortable: true,
+    cell: (row) => {
+      const isClosed = row.openQty === 0;
+      return (
+        <span className={`badge ${isClosed ? "bg-success" : "bg-warning"}`}>
+          {isClosed ? "Closed" : "Open"}
+        </span>
+      );
+    },
   },
-  sortable: true,
-}
 ];
 
 const PurchaseOrderList = () => {
@@ -81,41 +82,47 @@ const PurchaseOrderList = () => {
   });
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [showFilters, setShowFilters] = useState(false); // ⬅️ sama seperti ShippingPlanList
+  const [showFilters, setShowFilters] = useState(false);
+
+  // state baru untuk edit modal
+  const [editMode, setEditMode] = useState(false);
+  const [formData, setFormData] = useState({});
 
   useEffect(() => {
     fetchAll();
   }, [fetchAll]);
 
-  // map API items → table rows
-const tableData = items.map((item) => {
-  const openQty = item.open_quantity;
-  return {
-    partID: item.part_code,
-    partName: item.part_name,
-    pecgiPO: item.pecgi_no,
-    ppapPO: item.ppap_no,
-    reqDateFormatted: item.request_date_formatted,
-    reqDate: item.request_date,
-    poLine: item.line,
-    issuedQty: item.original_quantity,
-    openQty: openQty,
-    statusQty: openQty === 0 ? "Closed" : "Open",  // ⬅️ logic status
-    __raw: item,
-  }
-});
+  const filteredData = useMemo(() => {
+  const tableData = items.map((item) => {
+    const openQty = item.open_quantity;
+    return {
+      partID: item.part_code,
+      partName: item.part_name,
+      pecgiPO: item.pecgi_no,
+      ppapPO: item.ppap_no,
+      reqDateFormatted: item.request_date_formatted,
+      reqDate: item.request_date,
+      poLine: item.line,
+      issuedQty: item.original_quantity,
+      openQty: openQty,
+      statusQty: openQty === 0 ? "Closed" : "Open",
+      __raw: item,
+    };
+  });
 
-  const filteredData = tableData.filter((row) =>
+  return tableData.filter((row) =>
     Object.entries(filters).every(
       ([key, val]) =>
         !val || row[key]?.toString().toLowerCase().includes(val.toLowerCase())
     )
   );
+}, [items, filters]);
 
   const onRowClick = (row) => {
     setSelectedRow(row);
     fetchHistory(row.__raw.id);
     setModalOpen(true);
+    setEditMode(false); // reset edit mode
   };
 
   const formatDate = (d) =>
@@ -131,13 +138,13 @@ const tableData = items.map((item) => {
         <H5 className="mb-0">{PurchaseOrderTittle}</H5>
         <Filter
           className="cursor-pointer"
-          onClick={() => setShowFilters((prev) => !prev)} // ⬅️ toggle filter
+          onClick={() => setShowFilters((prev) => !prev)}
           size={18}
         />
       </CardHeader>
 
       <CardBody>
-        {showFilters && ( // ⬅️ filter bar hanya muncul kalau toggle ON
+        {showFilters && (
           <Row className="mb-3">
             <Col>
               <TableColumnFilter filters={filters} setFilters={setFilters} />
@@ -152,39 +159,47 @@ const tableData = items.map((item) => {
           pagination
         />
 
-        {/* Modal detail & history */}
+        {/* Modal details */}
         <Modal isOpen={modalOpen} toggle={() => setModalOpen(false)} size="lg">
           <ModalHeader toggle={() => setModalOpen(false)}>
             {selectedRow?.partID} - Detail
           </ModalHeader>
           <ModalBody>
             {selectedRow && (
-              <div className="mb-3">
+              <Form>
                 <Row className="mb-2">
                   <Col md={6}>
-                    <strong>Part Name:</strong>
-                    <br />
-                    {selectedRow.partName}
+                    <FormGroup>
+                      <strong>Part Name:</strong>
+                      <br />
+                        {selectedRow.partName}
+                    </FormGroup>
                   </Col>
                   <Col md={6}>
-                    <strong>Request Date:</strong>
-                    <br />
-                    {formatDate(selectedRow.reqDate)}
+                    <FormGroup>
+                      <strong>Request Date:</strong>
+                      <br />
+                       { formatDate(selectedRow.reqDate)}
+                    </FormGroup>
                   </Col>
                 </Row>
                 <Row>
                   <Col md={6}>
-                    <strong>PECGI PO:</strong>
-                    <br />
-                    {selectedRow.pecgiPO}
+                    <FormGroup>
+                      <strong>PECGI PO:</strong>
+                      <br />
+                        {selectedRow.pecgiPO}
+                    </FormGroup>
                   </Col>
                   <Col md={6}>
-                    <strong>PPAP PO:</strong>
-                    <br />
-                    {selectedRow.ppapPO}
+                    <FormGroup>
+                      <strong>PPAP PO:</strong>
+                      <br />
+                        {selectedRow.ppapPO}
+                    </FormGroup>
                   </Col>
                 </Row>
-              </div>
+              </Form>
             )}
 
             <Table bordered responsive className="mt-4">
@@ -204,13 +219,80 @@ const tableData = items.map((item) => {
                     return (
                       <tr key={i}>
                         <td>{date}</td>
-                        <td style={{ color }}>{qty}</td>
+                        <td style={{ color }}>
+                          {editMode ? (
+                            <Input
+                              type="text"
+                              value={formData.original_quantity}
+                              onChange={(e) =>
+                                setFormData({ ...formData, original_quantity: e.target.value })
+                              }
+                            />
+                          ) : (
+                            qty
+                          )}
+                        </td>
                         <td>{h.total}</td>
                       </tr>
                     );
                   })}
               </tbody>
             </Table>
+
+            <div className="d-flex justify-content-end mt-3 gap-2">
+              {editMode ? (
+                <Button
+                  color="success"
+                  onClick={() => {
+                    axios
+                      .put(`/purchase_order_details/${selectedRow.__raw.id}`, formData)
+                      .then(() => {
+                        alert("Data berhasil diupdate!");
+                        setEditMode(false);
+                        fetchAll(); // refresh tabel PO
+                        setModalOpen(false);
+                      })
+                      .catch((err) => console.error(err));
+                  }}
+                >
+                  Save
+                </Button>
+              ) : (
+                <Button
+                  color="primary"
+                  onClick={() => {
+                    setFormData({
+                      original_quantity: selectedRow.issuedQty,
+                    });
+                    setEditMode(true);
+                  }}
+                >
+                  Edit
+                </Button>
+              )}
+              <Button
+                color="danger"
+                onClick={() => {
+                  if (window.confirm("Apakah Anda yakin ingin menghapus PO ini?")) {
+                    axios
+                      .delete(`/purchase_order_details/${selectedRow.__raw.id}`)
+                      .then(() => {
+                        alert("PO berhasil dihapus!");
+                        setModalOpen(false);
+                        fetchAll(); // refresh tabel PO
+                      })
+                      .catch((err) => console.error(err));
+                  }
+                }}
+              >
+                Hapus
+              </Button>
+              {editMode && (
+                <Button color="secondary" onClick={() => setEditMode(false)}>
+                  Cancel
+                </Button>
+              )}
+            </div>
           </ModalBody>
         </Modal>
       </CardBody>
