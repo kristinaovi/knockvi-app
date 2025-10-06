@@ -16,7 +16,7 @@ import { useChangePassword } from "../../../Hooks/useChangePassword"; // import 
 import { toast } from "react-toastify";
 
 const EditMyProfile = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit} = useForm();
   const { changePassword, loading } = useChangePassword();
 
 const onEditSubmit = async (data) => {
@@ -52,9 +52,6 @@ const onEditSubmit = async (data) => {
                   placeholder="********"
                   {...register("OldPassword", { required: true })}
                 />
-                <span style={{ color: "red" }}>
-                  {errors.OldPassword && "Old Password is required"}
-                </span>
               </FormGroup>
             </Col>
 
@@ -67,9 +64,6 @@ const onEditSubmit = async (data) => {
                   placeholder="********"
                   {...register("NewPassword", { required: true })}
                 />
-                <span style={{ color: "red" }}>
-                  {errors.NewPassword && "New Password is required"}
-                </span>
               </FormGroup>
             </Col>
 
@@ -82,10 +76,6 @@ const onEditSubmit = async (data) => {
                   placeholder="********"
                   {...register("ConfirmNewPassword", { required: true })}
                 />
-                <span style={{ color: "red" }}>
-                  {errors.ConfirmNewPassword &&
-                    "Confirm New Password is required"}
-                </span>
               </FormGroup>
             </Col>
           </Row>

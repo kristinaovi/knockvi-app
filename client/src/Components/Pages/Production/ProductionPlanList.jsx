@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useMemo } from "react";
 import {
   Card,
   CardBody,
@@ -13,6 +14,7 @@ import {
   FormGroup,
   Input,
   Button,
+  ModalFooter,
 } from "reactstrap";
 import DataTable from "react-data-table-component";
 import { H5 } from "../../../AbstractElements";
@@ -22,7 +24,8 @@ import useProductionPlan from "../../../Hooks/useProductionPlan";
 import useProductionProcess from "../../../Hooks/useProductionProcess";
 import useParts from "../../../Hooks/useParts";
 import useMachines from "../../../Hooks/useMachines";
-import axios from "axios";
+import axios from "../../../api/axios";
+
 
 const ProductionPlanList = () => {
   const { items: productionPlans, fetchAll: fetchProductionPlans } =
@@ -31,8 +34,20 @@ const ProductionPlanList = () => {
   const { items: machines, fetchAll: fetchMachinesAll } = useMachines();
 
   const [prodList, setProdList] = useState([]);
-  const [filters, setFilters] = useState({});
+const [filters, setFilters] = useState({
+  prod_code: "",
+  part_name: "",
+  machine_name: "",
+  quantity_plan: "",
+  quantity_actual: "",
+  machine_status: "",
+  remarks: "",
+
+});
+
   const [showFilters, setShowFilters] = useState(false);
+
+  
 
   // Save draft row (confirm before adding row officially)
   const saveDraftRow = (index) => {
@@ -125,51 +140,45 @@ const ProductionPlanList = () => {
     ]);
   };
 
-const handleSave = async () => {
-  if (!selectedPlan) return;
+  const handleSave = async () => {
+    if (!selectedPlan) return;
 
-  // 🔹 definisikan planId
-  const planId = selectedPlan.id;
+    // 🔹 definisikan planId
+    const planId = selectedPlan.id;
 
-  // 🔹 siapkan data untuk plan
-  const planData = {
-    part_id: selectedPlan.part_id,
-    machine_id: formData.machine_id || selectedPlan.machine_id,
-    status: formData.status || selectedPlan.status,
-    quantity_plan: formData.quantity_plan || selectedPlan.quantity_plan,
-    remarks: formData.remarks || selectedPlan.remarks,
+    // 🔹 siapkan data untuk plan
+    const planData = {
+      part_id: selectedPlan.part_id,
+      machine_id: formData.machine_id || selectedPlan.machine_id,
+      status: formData.status || selectedPlan.status,
+      quantity_plan: formData.quantity_plan || selectedPlan.quantity_plan,
+      remarks: formData.remarks || selectedPlan.remarks,
+    };
+
+    // 🔹 siapkan data untuk process
+    const processData = [
+      ...tableData, // data lama
+      ...newRows.map((row) => ({
+        ...row,
+        production_plan_id: selectedPlan.id,
+        output_1: Number(row.output_1) || 0,
+        output_2: Number(row.output_2) || 0,
+      })),
+    ];
+
+    try {
+      await axios.put(`/production_plan/save-both/${planId}`, { planData, processData })
+
+      alert("Data berhasil disimpan!");
+      toggleModal();
+      fetchProductionPlans();
+      setNewRows([]);
+      setEditMode(false);
+    } catch (err) {
+      console.error(err);
+      alert("Gagal simpan data!");
+    }
   };
-
-  // 🔹 siapkan data untuk process
-  const processData = [
-    ...tableData, // data lama
-    ...newRows.map((row) => ({
-      ...row,
-      production_plan_id: selectedPlan.id,
-      output_1: Number(row.output_1) || 0,
-      output_2: Number(row.output_2) || 0,
-    })),
-  ];
-
-  try {
-    await fetch(`/production_plan/save-both/${planId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ planData, processData }),
-    });
-
-    alert("Data berhasil disimpan!");
-    toggleModal();
-    fetchProductionPlans();
-    setNewRows([]);
-    setEditMode(false);
-  } catch (err) {
-    console.error(err);
-    alert("Gagal simpan data!");
-  }
-};
-
-
 
   const handleDelete = async () => {
     if (!window.confirm("Apakah Anda yakin ingin menghapus data ini?")) return;
@@ -192,21 +201,32 @@ const handleSave = async () => {
     )
   );
 
+  // 2. baru hitung total pakai filteredData
+  const totals = useMemo(() => {
+    return filteredData.reduce(
+      (acc, row) => {
+        acc.issued += Number(row.issuedQty) || 0;
+        acc.open += Number(row.openQty) || 0;
+        return acc;
+      },
+      { issued: 0, open: 0 }
+    );
+  }, [filteredData]);
+
   const columns = [
     {
-      name: "Production ID",
-      selector: (row) => row.id,
+      name: "Production Code",
+      selector: (row) => row.prod_code,
       sortable: true,
       cell: (row) => (
         <button
           className="btn btn-link p-0 text-primary"
           onClick={() => toggleModal(row)}
         >
-          {row.part_id}
+          {row.prod_code}
         </button>
       ),
     },
-    { name: "Part ID", selector: (row) => row.part_id, sortable: true },
     { name: "Part Name", selector: (row) => row.part_name, sortable: true },
     {
       name: "Machine No.",
@@ -223,15 +243,38 @@ const handleSave = async () => {
       selector: (row) => row.quantity_actual || 0,
       sortable: true,
     },
-    { name: "Status", selector: (row) => row.status, sortable: true },
+    { name: "Machine Status", selector: (row) => row.status, sortable: true },
     { name: "Remarks", selector: (row) => row.remarks, sortable: false },
+    {
+      name: "Status",
+      selector: (row) => (row.prod_status ? "Closed" : "Open"),
+      sortable: true,
+      cell: (row) => {
+        const isClosed = !!row.prod_status;
+        return (
+          <span
+            className={`badge ${isClosed ? "bg-success" : "bg-warning"}`}
+            style={{ whiteSpace: "nowrap" }}
+          >
+            {isClosed ? "Closed" : "Open"}
+          </span>
+        );
+      },
+      minWidth: "90px",
+      grow: 0.5,
+      left: true,
+    },
   ];
 
   return (
     <Card>
-      <CardHeader className="d-flex justify-content-between">
+      <CardHeader className="card-no-border d-flex justify-content-between align-items-center">
         <H5>Production List</H5>
-        <Filter className="cursor-pointer" onClick={toggleFilter} />
+        <Filter
+          className="cursor-pointer"
+          onClick={() => setShowFilters((prev) => !prev)}
+          size={18}
+        />
       </CardHeader>
       <CardBody>
         {showFilters && (
@@ -243,29 +286,37 @@ const handleSave = async () => {
         )}
 
         <DataTable
+          className="support-table"
           columns={columns}
           data={filteredData}
           pagination
           striped
-          noDataComponent="No records found"
+          persistTableHead
         />
+
+        <div className="mt-2 d-flex justify-content-end">
+          <table className="table table-bordered w-auto">
+            <tbody>
+              <tr>
+                <th>Total Plan</th>
+                <td>{totals.issued}</td>
+                <th>Total Actual</th>
+                <td>{totals.open}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         {/* Modal */}
         <Modal isOpen={modalOpen} toggle={() => toggleModal(null)} size="lg">
           <ModalHeader toggle={() => toggleModal(null)}>
-            {selectedPlan?.part_id} - Detail
+            Details - {selectedPlan?.prod_code}
           </ModalHeader>
           <ModalBody>
             {selectedPlan && (
               <Form>
+                {/* Row 1: Part Name | Machine No */}
                 <Row className="mb-2">
-                  <Col md={6}>
-                    <FormGroup>
-                      <strong>Part ID :</strong>
-                      <br />
-                      {selectedPlan.part_id}
-                    </FormGroup>
-                  </Col>
                   <Col md={6}>
                     <FormGroup>
                       <strong>Part Name :</strong>
@@ -273,9 +324,6 @@ const handleSave = async () => {
                       {selectedPlan.part_name}
                     </FormGroup>
                   </Col>
-                </Row>
-
-                <Row className="mb-2">
                   <Col md={6}>
                     <FormGroup>
                       <strong>Machine No. :</strong>
@@ -305,7 +353,30 @@ const handleSave = async () => {
                       )}
                     </FormGroup>
                   </Col>
+                </Row>
 
+                {/* Row 2: Quantity Plan | Machine Status */}
+                <Row className="mb-2">
+                  <Col md={6}>
+                    <FormGroup>
+                      <strong>Quantity Plan :</strong>
+                      <br />
+                      {editMode ? (
+                        <Input
+                          type="number"
+                          value={formData.quantity_plan}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              quantity_plan: e.target.value,
+                            })
+                          }
+                        />
+                      ) : (
+                        selectedPlan.quantity_plan
+                      )}
+                    </FormGroup>
+                  </Col>
                   <Col md={6}>
                     <FormGroup>
                       <strong>Machine Status :</strong>
@@ -333,28 +404,8 @@ const handleSave = async () => {
                   </Col>
                 </Row>
 
+                {/* Row 3: Remark */}
                 <Row className="mb-2">
-                  <Col md={6}>
-                    <FormGroup>
-                      <strong>Quantity Plan :</strong>
-                      <br />
-                      {editMode ? (
-                        <Input
-                          type="number"
-                          value={formData.quantity_plan}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              quantity_plan: e.target.value,
-                            })
-                          }
-                        />
-                      ) : (
-                        selectedPlan.quantity_plan
-                      )}
-                    </FormGroup>
-                  </Col>
-
                   <Col md={6}>
                     <FormGroup>
                       <strong>Remark :</strong>
@@ -394,7 +445,7 @@ const handleSave = async () => {
                 <tbody>
                   {tableData.map((item, idx) => (
                     <tr key={`saved-${idx}`}>
-                      <td>{item.date}</td>
+                      <td>{new Date(item.date).toLocaleDateString("en-CA")}</td>
                       <td>{item.output_1}</td>
                       <td>{item.output_2}</td>
                       <td>
@@ -463,7 +514,11 @@ const handleSave = async () => {
                   {editMode && (
                     <tr>
                       <td colSpan="5" className="text-center">
-                        <Button size="sm" color="primary" onClick={startAddNewRow}>
+                        <Button
+                          size="sm"
+                          color="primary"
+                          onClick={startAddNewRow}
+                        >
                           + Add Row
                         </Button>
                       </td>
@@ -472,27 +527,23 @@ const handleSave = async () => {
                 </tbody>
               </Table>
             </div>
-
-            <div className="d-flex justify-content-end mt-3 gap-2">
-              {editMode ? (
+          </ModalBody>
+          <ModalFooter>
+            {editMode ? (
+              <>
                 <Button color="success" onClick={handleSave}>
                   Save
                 </Button>
-              ) : (
-                <Button color="primary" onClick={() => setEditMode(true)}>
-                  Edit
-                </Button>
-              )}
-              <Button color="danger" onClick={handleDelete}>
-                Hapus
-              </Button>
-              {editMode && (
                 <Button color="secondary" onClick={() => setEditMode(false)}>
                   Cancel
                 </Button>
-              )}
-            </div>
-          </ModalBody>
+              </>
+            ) : (
+              <Button color="primary" onClick={() => setEditMode(true)}>
+                Edit
+              </Button>
+            )}
+          </ModalFooter>
         </Modal>
       </CardBody>
     </Card>

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useMemo } from "react";
 import usePurchaseOrderDetails from "../../../../Hooks/usePurchaseOrderDetails";
+import useParts from "../../../../Hooks/useParts";
 import {
   Card,
   CardBody,
@@ -16,18 +17,20 @@ import {
   Form,
   FormGroup,
   Input,
+  ModalFooter,
 } from "reactstrap";
-import axios from '../../../../api/axios'
+import axios from "../../../../api/axios";
 import DataTable from "react-data-table-component";
 import TableColumnFilter from "../../../Filter/TableColumnFilter";
 import { PurchaseOrderTittle } from "../../../../Constant";
 import { H5 } from "../../../../AbstractElements";
 import { Filter } from "react-feather"; // import icon filter
+import { toast } from "react-toastify"
 
 // define your table columns
 const poColumns = (onClickRow) => [
   {
-    name: "PART Code",
+    name: "Part Code",
     selector: (r) => r.partID,
     cell: (r) => (
       <button
@@ -38,20 +41,78 @@ const poColumns = (onClickRow) => [
       </button>
     ),
     sortable: true,
+    grow: 1,
+    left: true,
   },
-  { name: "PART NAME", selector: (r) => r.partName, sortable: true },
-  { name: "PECGI PO", selector: (r) => r.pecgiPO, sortable: true },
-  { name: "PPAP PO", selector: (r) => r.ppapPO, sortable: true },
-  { name: "REQUEST DATE", selector: (r) => r.reqDateFormatted, sortable: true },
-  { name: "PO LINE", selector: (r) => r.poLine, sortable: true },
-  { name: "ISSUED QTY", selector: (r) => r.issuedQty, sortable: true },
-  { name: "OPEN QTY", selector: (r) => r.openQty, sortable: true },
   {
-    name: "STATUS",
+    name: "Part Name",
+    selector: (r) => r.partName,
+    sortable: true,
+    grow: 1,
+    left: true,
+  },
+  {
+    name: "PECGI PO",
+    selector: (r) => r.pecgiPO,
+    sortable: true,
+    grow: 0.8,
+    left: true,
+  },
+  {
+    name: "PPAP PO",
+    selector: (r) => r.ppapPO,
+    sortable: true,
+    grow: 0.8,
+    left: true,
+  },
+  {
+    name: "Request Date",
+    selector: (r) => r.reqDateFormatted,
+    sortable: true,
+    grow: 0.8,
+    left: true,
+  },
+  {
+    name: "PO Line",
+    selector: (r) => r.poLine,
+    sortable: true,
+    grow: 0.8,
+    left: true,
+  },
+  {
+    name: "Issued Qty",
+    selector: (r) => r.issuedQty,
+    sortable: true,
+    grow: 0.8,
+    left: true,
+  },
+  {
+    name: "Open Qty",
+    selector: (r) => r.openQty,
+    sortable: true,
+    grow: 0.8,
+    left: true,
+  },
+  {
+    name: "Price",
+    selector: (r) => r.pricePO,
+    sortable: true,
+    grow: 0.8,
+    left: true,
+    cell: (r) => {
+      const val = Number(r.pricePO || 0);
+      return `$ ${val.toFixed(4)}`; // format ke 0.000
+    },
+  },
+
+  {
+    name: "Status",
     selector: (row) => row.statusQty,
     sortable: true,
+    grow: 0.5,
+    left: true,
     cell: (row) => {
-      const isClosed = row.openQty === 0;
+      const isClosed = Number(row.shipped_qty) == 0;
       return (
         <span className={`badge ${isClosed ? "bg-success" : "bg-warning"}`}>
           {isClosed ? "Closed" : "Open"}
@@ -61,7 +122,7 @@ const poColumns = (onClickRow) => [
   },
 ];
 
-const PurchaseOrderList = () => {
+const PurchaseOrderList = ({ statusFilter = "all" }) => {
   const {
     items,
     fetchAll,
@@ -78,6 +139,7 @@ const PurchaseOrderList = () => {
     poLine: "",
     issuedQty: "",
     openQty: "",
+    pricePO: "",
     statusQty: "",
   });
   const [modalOpen, setModalOpen] = useState(false);
@@ -88,35 +150,84 @@ const PurchaseOrderList = () => {
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({});
 
+  // ambil daftar parts supaya bisa lookup price berdasarkan part_id
+  const { items: parts, fetchParts } = useParts();
+
   useEffect(() => {
+    // fetch both purchase order details and parts once
     fetchAll();
-  }, [fetchAll]);
+    fetchParts();
+  }, [fetchAll, fetchParts]);
 
   const filteredData = useMemo(() => {
-  const tableData = items.map((item) => {
-    const openQty = item.open_quantity;
-    return {
-      partID: item.part_code,
-      partName: item.part_name,
-      pecgiPO: item.pecgi_no,
-      ppapPO: item.ppap_no,
-      reqDateFormatted: item.request_date_formatted,
-      reqDate: item.request_date,
-      poLine: item.line,
-      issuedQty: item.original_quantity,
-      openQty: openQty,
-      statusQty: openQty === 0 ? "Closed" : "Open",
-      __raw: item,
-    };
-  });
+    const tableData = (items || []).map((item) => {
+      const openQty = item.open_quantity ?? 0;
 
-  return tableData.filter((row) =>
-    Object.entries(filters).every(
-      ([key, val]) =>
-        !val || row[key]?.toString().toLowerCase().includes(val.toLowerCase())
-    )
-  );
-}, [items, filters]);
+      // cari part berdasarkan part_id (purchase_order_details.part_id)
+      const matchedPart = (parts || []).find(
+        (p) => Number(p.id) === Number(item.part_id)
+      );
+
+      // ambil price dari parts jika ada, fallback ke item.price atau 0
+      const priceFromParts =
+        matchedPart &&
+        matchedPart.price !== undefined &&
+        matchedPart.price !== null
+          ? Number(matchedPart.price)
+          : item.price !== undefined && item.price !== null
+          ? Number(item.price)
+          : 0;
+
+      return {
+        partID: item.part_code ?? item.part_id ?? "",
+        partName: item.part_name ?? "",
+        pecgiPO: item.pecgi_no ?? "",
+        ppapPO: item.ppap_no ?? "",
+        reqDateFormatted: item.request_date_formatted ?? "",
+        reqDate: item.requested_date ?? "",
+        poLine: item.line ?? "",
+        issuedQty: item.original_quantity ?? 0,
+        openQty: item.shipped_qty,
+        shipped_qty: item.shipped_qty,
+        pricePO: Number.isFinite(priceFromParts) ? priceFromParts : 0,
+        statusQty: Number(item.shipped_qty) === 0 ? "Closed" : "Open",
+        __raw: item,
+      };
+    });
+
+    // apply column filters (search inputs)
+    let result = tableData.filter((row) =>
+      Object.entries(filters).every(
+        ([key, val]) =>
+          !val ||
+          (row[key] !== undefined &&
+            row[key] !== null &&
+            row[key].toString().toLowerCase().includes(val.toLowerCase()))
+      )
+    );
+
+    // apply statusFilter from parent tab (all / open / closed)
+    if (statusFilter === "open") {
+      result = result.filter((r) => r.statusQty === "Open");
+    } else if (statusFilter === "closed") {
+      result = result.filter((r) => r.statusQty === "Closed");
+    }
+    // if 'all' -> no extra filter
+
+    return result;
+  }, [items, filters, statusFilter, parts]);
+
+  // 2. baru hitung total pakai filteredData
+  const totals = useMemo(() => {
+    return filteredData.reduce(
+      (acc, row) => {
+        acc.issued += Number(row.issuedQty) || 0;
+        acc.open += Number(row.openQty) || 0;
+        return acc;
+      },
+      { issued: 0, open: 0 }
+    );
+  }, [filteredData]);
 
   const onRowClick = (row) => {
     setSelectedRow(row);
@@ -131,6 +242,32 @@ const PurchaseOrderList = () => {
       month: "long",
       year: "numeric",
     });
+
+  // Custom styles for DataTable: header full, cells single-line with ellipsis
+  const customStyles = {
+    headCells: {
+      style: {
+        fontSize: "14px",
+        fontWeight: 600,
+        paddingLeft: "12px",
+        paddingRight: "12px",
+        whiteSpace: "normal", // biar judul kolom tidak "..."
+        overflow: "visible",
+        textOverflow: "unset",
+        lineHeight: "1.2",
+      },
+    },
+    cells: {
+      style: {
+        fontSize: "13px",
+        paddingLeft: "12px",
+        paddingRight: "12px",
+        whiteSpace: "nowrap", // isi tabel 1 baris
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+      },
+    },
+  };
 
   return (
     <Card>
@@ -153,16 +290,31 @@ const PurchaseOrderList = () => {
         )}
 
         <DataTable
+          className="support-table"
           columns={poColumns(onRowClick)}
           data={filteredData}
           striped
           pagination
+          persistTableHead
         />
+
+        <div className="mt-2 d-flex justify-content-end">
+          <table className="table table-bordered w-auto">
+            <tbody>
+              <tr>
+                <th>Total Issued</th>
+                <td>{totals.issued}</td>
+                <th>Total Open</th>
+                <td>{totals.open}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         {/* Modal details */}
         <Modal isOpen={modalOpen} toggle={() => setModalOpen(false)} size="lg">
           <ModalHeader toggle={() => setModalOpen(false)}>
-            {selectedRow?.partID} - Detail
+            Details - {selectedRow?.partID}
           </ModalHeader>
           <ModalBody>
             {selectedRow && (
@@ -172,14 +324,14 @@ const PurchaseOrderList = () => {
                     <FormGroup>
                       <strong>Part Name:</strong>
                       <br />
-                        {selectedRow.partName}
+                      {selectedRow.partName}
                     </FormGroup>
                   </Col>
                   <Col md={6}>
                     <FormGroup>
                       <strong>Request Date:</strong>
                       <br />
-                       { formatDate(selectedRow.reqDate)}
+                      {formatDate(selectedRow.reqDate)}
                     </FormGroup>
                   </Col>
                 </Row>
@@ -188,14 +340,14 @@ const PurchaseOrderList = () => {
                     <FormGroup>
                       <strong>PECGI PO:</strong>
                       <br />
-                        {selectedRow.pecgiPO}
+                      {selectedRow.pecgiPO}
                     </FormGroup>
                   </Col>
                   <Col md={6}>
                     <FormGroup>
                       <strong>PPAP PO:</strong>
                       <br />
-                        {selectedRow.ppapPO}
+                      {selectedRow.ppapPO}
                     </FormGroup>
                   </Col>
                 </Row>
@@ -205,9 +357,9 @@ const PurchaseOrderList = () => {
             <Table bordered responsive className="mt-4">
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>In/Out</th>
-                  <th>Total</th>
+                  <th style={{ width: "25%" }}>Date</th>
+                  <th style={{ width: "25%" }}>In/Out</th>
+                  <th style={{ width: "25%" }}>Outstanding</th>
                 </tr>
               </thead>
               <tbody>
@@ -225,7 +377,10 @@ const PurchaseOrderList = () => {
                               type="text"
                               value={formData.original_quantity}
                               onChange={(e) =>
-                                setFormData({ ...formData, original_quantity: e.target.value })
+                                setFormData({
+                                  ...formData,
+                                  original_quantity: e.target.value,
+                                })
                               }
                             />
                           ) : (
@@ -238,31 +393,75 @@ const PurchaseOrderList = () => {
                   })}
               </tbody>
             </Table>
-
+          </ModalBody>
+          <ModalFooter>
             <div className="d-flex justify-content-end mt-3 gap-2">
               {editMode ? (
-                <Button
-                  color="success"
-                  onClick={() => {
-                    axios
-                      .put(`/purchase_order_details/${selectedRow.__raw.id}`, formData)
-                      .then(() => {
-                        alert("Data berhasil diupdate!");
-                        setEditMode(false);
-                        fetchAll(); // refresh tabel PO
-                        setModalOpen(false);
-                      })
-                      .catch((err) => console.error(err));
-                  }}
-                >
-                  Save
-                </Button>
+                <>
+                  <Button
+                    style={{ minWidth: "100px" }}
+                    color="success"
+                    onClick={() => {
+                      axios
+                        .put(
+                          `/purchase_order_details/${selectedRow.__raw.id}`,
+                          formData
+                        )
+                        .then(() => {
+                          alert("Data berhasil diupdate!");
+                          setEditMode(false);
+                          fetchAll(); // refresh tabel PO
+                          setModalOpen(false);
+                          toast.success("Edit PO Success")
+                        })
+                        .catch((err) => console.error(err));
+                    }}
+                  >
+                    Save
+                  </Button>
+
+                  <Button
+                    style={{ minWidth: "100px" }}
+                    color="danger"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Apakah Anda yakin ingin menghapus PO ini?"
+                        )
+                      ) {
+                        axios
+                          .delete(
+                            `/purchase_order_details/${selectedRow.__raw.id}`
+                          )
+                          .then(() => {
+                            alert("PO berhasil dihapus!");
+                            toast.success("Delete PO Success")
+                            setModalOpen(false);
+                            fetchAll(); // refresh tabel PO
+                          })
+                          .catch((err) => console.error(err));
+                      }
+                    }}
+                  >
+                    Delete
+                  </Button>
+
+                  <Button
+                    style={{ minWidth: "100px" }}
+                    color="secondary"
+                    onClick={() => setEditMode(false)}
+                  >
+                    Cancel
+                  </Button>
+                </>
               ) : (
                 <Button
+                  style={{ minWidth: "100px" }}
                   color="primary"
                   onClick={() => {
                     setFormData({
-                      original_quantity: selectedRow.issuedQty,
+                      original_quantity: selectedRow?.issuedQty || "",
+                      // kalau ada field lain, tambahkan di sini
                     });
                     setEditMode(true);
                   }}
@@ -270,30 +469,8 @@ const PurchaseOrderList = () => {
                   Edit
                 </Button>
               )}
-              <Button
-                color="danger"
-                onClick={() => {
-                  if (window.confirm("Apakah Anda yakin ingin menghapus PO ini?")) {
-                    axios
-                      .delete(`/purchase_order_details/${selectedRow.__raw.id}`)
-                      .then(() => {
-                        alert("PO berhasil dihapus!");
-                        setModalOpen(false);
-                        fetchAll(); // refresh tabel PO
-                      })
-                      .catch((err) => console.error(err));
-                  }
-                }}
-              >
-                Hapus
-              </Button>
-              {editMode && (
-                <Button color="secondary" onClick={() => setEditMode(false)}>
-                  Cancel
-                </Button>
-              )}
             </div>
-          </ModalBody>
+          </ModalFooter>
         </Modal>
       </CardBody>
     </Card>

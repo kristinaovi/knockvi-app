@@ -27,19 +27,26 @@ const MyProfile = () => {
       <Card>
 <CardBody>
           <Form>
-            <Row className='mb-2'>
-              <div className='profile-title'>
-                <div className='media'>
-                  <Image attrImage={{ className: 'img-70 m-0 rounded-circle', alt: '', src: `${require('../../../assets/images/user/7.jpg')}` }} />
-                  <div className='media-body'>
-                    <Link to={`${process.env.PUBLIC_URL}/app/users/userProfile/${layoutURL}`}>
-                      <H5 attrH5={{ className: 'mb-1' }}>{me?.name}</H5>
-                    </Link>
-                    <P>{me?.role}</P>
-                  </div>
-                </div>
-              </div>
-            </Row>
+<Row className='mb-2'>
+  <div className='profile-title'>
+    <div className='media'>
+      <Image
+        attrImage={{
+          className: 'img-70 m-0 rounded-circle',
+          alt: 'Profile',
+          src: 'https://ui-avatars.com/api/?name=Random+User&background=random',
+        }}
+      />
+      <div className='media-body'>
+        <Link to={`${process.env.PUBLIC_URL}/app/users/userProfile/${layoutURL}`}>
+          <H5 attrH5={{ className: 'mb-1' }}>{me?.name}</H5>
+        </Link>
+        <P>{me?.role}</P>
+      </div>
+    </div>
+  </div>
+</Row>
+
             <FormGroup className='mb-3'>
               <Label className='form-label'>Badge No.</Label>
               <div>{me?.badge_number || '-'}</div>

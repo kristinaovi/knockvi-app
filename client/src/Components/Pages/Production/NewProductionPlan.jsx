@@ -1,9 +1,20 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Modal, ModalHeader, ModalBody, Button, Form, FormGroup, Label, Input } from "reactstrap";
+import {
+  Modal,
+  ModalHeader,
+  ModalBody,
+  Button,
+  Form,
+  FormGroup,
+  Label,
+  Input,
+  ModalFooter,
+} from "reactstrap";
 import useParts from "../../../Hooks/useParts";
 import useMachines from "../../../Hooks/useMachines";
 import useProductionPlan from "../../../Hooks/useProductionPlan";
 import Select from "react-select";
+
 
 const NewProductionPlan = ({ isOpen, toggle, currentUserId, onSuccess }) => {
   const isMounted = useRef(true);
@@ -22,11 +33,24 @@ const NewProductionPlan = ({ isOpen, toggle, currentUserId, onSuccess }) => {
     updated_by: currentUserId || null,
   });
 
-  useEffect(() => { fetchParts(); fetchMachines(); }, [fetchParts, fetchMachines]);
-  useEffect(() => { isMounted.current = true; return () => { isMounted.current = false; }; }, []);
+  useEffect(() => {
+    fetchParts();
+    fetchMachines();
+  }, [fetchParts, fetchMachines]);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handleSave = async () => {
-    if (!formData.part_id || !formData.machine_id || !formData.status || !formData.quantity_plan) {
+    if (
+      !formData.part_id ||
+      !formData.machine_id ||
+      !formData.status ||
+      !formData.quantity_plan
+    ) {
       alert("Please fill all required fields!");
       return;
     }
@@ -67,46 +91,121 @@ const NewProductionPlan = ({ isOpen, toggle, currentUserId, onSuccess }) => {
         <Form className="d-flex mb-4">
           <div className="me-3" style={{ flex: 1 }}>
             <FormGroup>
-              <Label><strong>Part</strong></Label>
+              <Label>
+                <strong>Product</strong>
+              </Label>
               <Select
-                options={parts.map(p => ({ value: p.id, label: `${p.code} - ${p.name}` }))}
-                value={parts.filter(p => p.id === formData.part_id).map(p => ({ value: p.id, label: p.code }))[0] || null}
-                onChange={e => setFormData(prev => ({ ...prev, part_id: e.value }))}
+                options={parts.map((p) => ({
+                  value: p.id,
+                  label: `${p.code} - ${p.name}`,
+                }))}
+                value={
+                  parts.find((p) => p.id === formData.part_id)
+                    ? {
+                        value: formData.part_id,
+                        label: `${
+                          parts.find((p) => p.id === formData.part_id).code
+                        } - ${
+                          parts.find((p) => p.id === formData.part_id).name
+                        }`,
+                      }
+                    : null
+                }
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    part_id: e ? e.value : null,
+                  }))
+                }
+                isClearable
+                placeholder="Select product"
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label>
+                <strong>Machine No.</strong>
+              </Label>
+              <Select
+                isClearable
+                placeholder="Select machine no."
+                options={machines.map((m) => ({ value: m.id, label: m.name }))}
+                value={
+                  machines
+                    .filter((m) => m.id === formData.machine_id)
+                    .map((m) => ({ value: m.id, label: m.name }))[0] || null
+                }
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, machine_id: e.value }))
+                }
               />
             </FormGroup>
             <FormGroup>
-              <Label><strong>Machine</strong></Label>
-              <Select
-                options={machines.map(m => ({ value: m.id, label: m.name }))}
-                value={machines.filter(m => m.id === formData.machine_id).map(m => ({ value: m.id, label: m.name }))[0] || null}
-                onChange={e => setFormData(prev => ({ ...prev, machine_id: e.value }))}
+              <Label>
+                <strong>Quantity Plan</strong>
+              </Label>
+              <Input
+                type="number"
+                value={formData.quantity_plan}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    quantity_plan: e.target.value,
+                  }))
+                }
+                placeholder="Enter quantity plan"
               />
-            </FormGroup>
-            <FormGroup>
-              <Label><strong>Quantity Plan</strong></Label>
-              <Input type="number" value={formData.quantity_plan} onChange={e => setFormData(prev => ({ ...prev, quantity_plan: e.target.value }))} />
             </FormGroup>
           </div>
           <div style={{ flex: 1 }}>
             <FormGroup>
-              <Label><strong>Status</strong></Label>
-              <Input type="select" value={formData.status} onChange={e => setFormData(prev => ({ ...prev, status: e.target.value }))}>
-                <option value="">-- Select Status --</option>
-                <option value="Setting">Setting</option>
-                <option value="Repair">Repair</option>
-                <option value="Running">Running</option>
-              </Input>
+              <Label>
+                <strong>Machine Status</strong>
+              </Label>
+              <Select
+                value={
+                  formData.status
+                    ? { value: formData.status, label: formData.status }
+                    : null
+                }
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    status: e ? e.value : null,
+                  }))
+                }
+                options={[
+                  { value: "Setting", label: "Setting" },
+                  { value: "Repair", label: "Repair" },
+                  { value: "Running", label: "Running" },
+                ]}
+                isClearable
+                placeholder="Select machine status"
+              />
             </FormGroup>
+
             <FormGroup>
-              <Label><strong>Remarks</strong></Label>
-              <Input type="text" value={formData.remarks} onChange={e => setFormData(prev => ({ ...prev, remarks: e.target.value }))} />
+              <Label>
+                <strong>Remarks</strong>
+              </Label>
+              <Input
+                type="text"
+                value={formData.remarks}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, remarks: e.target.value }))
+                }
+                placeholder="Enter remark"
+              />
             </FormGroup>
           </div>
         </Form>
-        <div className="text-end mt-3">
-          <Button color="success" onClick={handleSave}>Save</Button>
-        </div>
+
       </ModalBody>
+      <ModalFooter>
+          <Button color="primary" onClick={handleSave}>
+            Save
+          </Button>
+      </ModalFooter>
     </Modal>
   );
 };

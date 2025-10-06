@@ -1,128 +1,141 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Button,
-  Form,
-  FormGroup,
-  Label,
-  Input,
+  Button, Form, FormGroup, Label, Input,
+  Modal, ModalHeader, ModalBody, ModalFooter
 } from "reactstrap";
+import Select from "react-select";
+import useParts from "../../../Hooks/useParts";
+import useInventory from "../../../Hooks/useInventory";
 
-const NewInventory = ({ toggleModal, onSuccess }) => {
+const NewInventory = ({ isOpen, toggle, onSuccess }) => {
+  const { items: parts, fetchParts } = useParts();
+  const { createOrUpdate } = useInventory();
+
   const [formData, setFormData] = useState({
-    partId: "",
+    partCode: "",
     partName: "",
-    machineNo: "",
-    machineStatus: "",
-    quantity: "",
+    totalStock: "",
+    finishGood: "",
+    carton: "",
+    pallete: "",
   });
 
-  // Dummy data (statis)
-  const parts = [
-    { id: 1, code: "BTY2AAC001", name: "Case 123A" },
-    { id: 2, code: "BTY2AAC002", name: "Case 456B" },
-    { id: 3, code: "BTY2AAC003", name: "Case 789C" },
-  ];
+  const isPartSelected = !!formData.partCode;
 
-  const machines = [
-    { id: 1, name: "TR-01" },
-    { id: 2, name: "TR-02" },
-    { id: 3, name: "DTR-13" },
-    { id: 4, name: "DTR-14" },
-    { id: 5, name: "PD-12" },
-    { id: 6, name: "PD-50" },
-    { id: 7, name: "PD-60" },
-  ];
+  // Ambil daftar parts saat modal dibuka
+  useEffect(() => {
+    if (isOpen) fetchParts();
+  }, [isOpen, fetchParts]);
 
-  const handleSave = () => {
-    console.log("New Inventory Data:", formData);
+  const handleSave = async () => {
+    try {
+      await createOrUpdate({
+        inven_code: "INV-" + Date.now(), // auto generate
+        part_code: formData.partCode,
+        part_name: formData.partName,
+        total_stock: formData.totalStock,
+        finish_good: formData.finishGood,
+        carton: formData.carton,
+        pallete: formData.pallete,
+      });
 
-    if (onSuccess) onSuccess(); // Bisa untuk refresh parent
-    toggleModal(); // Tutup modal
-    setFormData({
-      partId: "",
-      partName: "",
-      machineNo: "",
-      machineStatus: "",
-      quantity: "",
-    });
+      if (onSuccess) onSuccess();
+      toggle();
+      setFormData({
+        partCode: "",
+        partName: "",
+        totalStock: "",
+        finishGood: "",
+        carton: "",
+        pallete: "",
+      });
+    } catch (err) {
+      console.error("Save Inventory Error:", err);
+    }
   };
 
   return (
-    <Form className="d-flex mb-4">
-      <div className="me-3" style={{ flex: 1 }}>
-        {/* Part ID Dropdown */}
-        <FormGroup>
-          <Label><strong>Part ID</strong></Label>
-          <Input
-            type="select"
-            name="partId"
-            value={formData.partId || ""}
-            onChange={(e) => {
-              const selectedCode = e.target.value;
-              const selectedPart = parts.find(p => p.code === selectedCode);
-              setFormData(prev => ({
-                ...prev,
-                partId: selectedCode,
-                partName: selectedPart ? selectedPart.name : ""
-              }));
-            }}
-          >
-            <option value="">-- Select Part ID --</option>
-            {parts.map(part => (
-              <option key={part.id} value={part.code}>
-                {part.code}
-              </option>
-            ))}
-          </Input>
-        </FormGroup>
+    <Modal isOpen={isOpen} toggle={toggle} size="xl">
+      <ModalHeader toggle={toggle}>Add New Inventory</ModalHeader>
+      <ModalBody>
+        <Form className="row">
+          {/* Part ID Dropdown */}
+          <FormGroup className="col-md-6">
+            <Label><strong>Part ID</strong></Label>
+            <Select
+              options={parts.map(p => ({
+                value: p.code,
+                label: p.code,
+                name: p.name,
+                carton: p.pack_carton_quantity,
+                pallete: p.pack_plt_quantity,
+              }))}
+              value={
+                formData.partCode
+                  ? { value: formData.partCode, label: formData.partCode }
+                  : null
+              }
+              onChange={(option) =>
+                setFormData(prev => ({
+                  ...prev,
+                  partCode: option?.value || "",
+                  partName: option?.name || "",
+                  carton: option?.carton || "",
+                  pallete: option?.pallete || "",
+                }))
+              }
+              isClearable
+              placeholder="Select Part ID"
+            />
+          </FormGroup>
 
-        {/* Machine No. Dropdown */}
-        <FormGroup>
-          <Label><strong>Total Stock</strong></Label>
-          <Input
-            type="select"
-            name="machineNo"
-            value={formData.machineNo || ""}
-            onChange={(e) => setFormData(prev => ({ ...prev, machineNo: e.target.value }))}
-          >
-            <option value="">-- Select From Production Output --</option>
-            {machines.map(machine => (
-              <option key={machine.id} value={machine.name}>
-                {machine.name}
-              </option>
-            ))}
-          </Input>
-        </FormGroup>
+          {/* Part Name */}
+          <FormGroup className="col-md-6">
+            <Label><strong>Part Name</strong></Label>
+            <Input
+              type="text"
+              disabled={!isPartSelected}
+              value={formData.partName || ""}
+              placeholder="Please select Part ID"
+              readOnly
+            />
+          </FormGroup>
 
-      </div>
+          {/* Total Stock */}
+          <FormGroup className="col-md-6">
+            <Label><strong>Total Stock</strong></Label>
+            <Input
+              type="number"
+              name="totalStock"
+              value={formData.totalStock}
+              onChange={(e) =>
+                setFormData(prev => ({ ...prev, totalStock: e.target.value }))
+              }
+              placeholder="Enter total stock"
+            />
+          </FormGroup>
 
-      <div style={{ flex: 1 }}>
-        {/* Part Name (Auto from Part ID) */}
-        <FormGroup>
-          <Label><strong>Part Name</strong></Label>
-          <Input
-            type="text"
-            name="partName"
-            readOnly
-            value={formData.partName || ""}
-          />
-        </FormGroup>
-
-        {/* Machine Status Dropdown */}
-        <FormGroup>
-          <Label><strong>Finish Good</strong></Label>
-          <Input
-            type="number"
-          />
-        </FormGroup>
-
-        <div className="text-end mt-3">
-          <Button color="success" onClick={handleSave}>
-            Save
-          </Button>
-        </div>
-      </div>
-    </Form>
+          {/* Finish Good */}
+          <FormGroup className="col-md-6">
+            <Label><strong>Finish Good</strong></Label>
+            <Input
+              type="number"
+              name="finishGood"
+              value={formData.finishGood}
+              onChange={(e) =>
+                setFormData(prev => ({ ...prev, finishGood: e.target.value }))
+              }
+              placeholder="Enter finish good"
+            />
+          </FormGroup>
+        </Form>
+      </ModalBody>
+      <ModalFooter>
+        <Button color="primary" onClick={handleSave}>
+          Save
+        </Button>
+      </ModalFooter>
+    </Modal>
   );
 };
 

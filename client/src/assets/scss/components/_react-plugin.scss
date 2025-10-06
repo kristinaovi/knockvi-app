@@ -1758,23 +1758,29 @@ body.dark-only {
   .rdt_Table {
     .rdt_TableHead {
       .rdt_TableHeadRow {
-        .rdt_TableCol:nth-child(4) {
-          .rdt_TableCol_Sortable {
-            justify-content: flex-start;
-          }
+        /* Kolom ke-4 = Email */
+        .rdt_TableCol:nth-child(4),
+        .rdt_TableCol:nth-child(4) .rdt_TableCol_Sortable {
+          justify-content: flex-start !important;
+          text-align: left !important;
         }
       }
     }
+
     .rdt_TableBody {
       .rdt_TableRow {
         border-color: var(--chart-border);
+
+        /* Cell ke-4 = Email */
         .rdt_TableCell:nth-child(4) {
-          justify-content: start !important;
+          justify-content: flex-start !important;
+          text-align: left !important;
         }
       }
     }
   }
 }
+
 
 .loader-wrapper.loderhide {
   display: none;

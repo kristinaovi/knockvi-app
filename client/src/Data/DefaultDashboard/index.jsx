@@ -108,19 +108,19 @@ export const LightCardData2 = [
   {
     title: "Order",
     icon: <Package size={24} color="#FF0000" />, // hijau
-    price: "0",
+    price: "1500 pcs",
     color: "success",
   },
   {
     title: "Production",
     icon: <Factory size={24} color="#007BFF" />, // merah
-    price: "0",
+    price: "1000 pcs",
     color: "danger",
   },
   {
     title: "Shipping",
     icon: <Truck size={24} color="#28A745" />, // biru
-    price: "0",
+    price: "500 pcs",
   },
 ];
 

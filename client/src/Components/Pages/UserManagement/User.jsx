@@ -34,8 +34,8 @@ const User = () => {
                 <Col md="6">
                   <Nav tabs className="border-tab">
                     <NavItem><NavLink className={activeTab === '1' ? 'active' : ''} onClick={() => setActiveTab('1')}><Target />{All}</NavLink></NavItem>
-                    <NavItem><NavLink className={activeTab === '2' ? 'active' : ''} onClick={() => setActiveTab('2')}><Info />{Open}</NavLink></NavItem>
-                    <NavItem><NavLink className={activeTab === '3' ? 'active' : ''} onClick={() => setActiveTab('3')}><CheckCircle />{Closed}</NavLink></NavItem>
+                    <NavItem><NavLink className={activeTab === '2' ? 'active' : ''} onClick={() => setActiveTab('2')}><Info />Active</NavLink></NavItem>
+                    <NavItem><NavLink className={activeTab === '3' ? 'active' : ''} onClick={() => setActiveTab('3')}><CheckCircle />Inactive</NavLink></NavItem>
                   </Nav>
                 </Col>
                 <Col md="6">
