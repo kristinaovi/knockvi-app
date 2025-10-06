@@ -308,17 +308,17 @@ export const OptionsOverView = {
     {
       name: "Production",
       type: "area",
-      data: [], // kosong
+      data: [0, 0, 0, 0, 0, 0, 0, 0, 1000, 0, 0], // hanya September 1000
     },
     {
       name: "Order",
       type: "area",
-      data: [], // kosong
+      data: [0, 0, 0, 0, 0, 0, 0, 0, 1500, 0, 0], // kosong
     },
     {
       name: "Shipping",
       type: "area",
-      data: [], // kosong
+      data: [0, 0, 0, 0, 0, 0, 0, 0, 500, 0, 0], // kosong
     },
   ],
   options: {
@@ -421,6 +421,7 @@ export const OptionsOverView = {
     ],
   },
 };
+
 
 // Over Chart Bar Option
 export const OptionsOverViewBarChart = {

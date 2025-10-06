@@ -22,9 +22,9 @@ const Breadcrumbs = (props) => {
                     <SvgIcon iconId='stroke-home' />
                   </Link>
                 </li>
-                <li className='breadcrumb-item'>{props.parent}</li>
-                {props.subParent ? <li className='breadcrumb-item'>{props.subParent}</li> : ''}
-                <li className='breadcrumb-item active'>{props.title}</li>
+                {props.parent && <li className='breadcrumb-item'>{props.parent}</li>}
+                {props.subParent && <li className='breadcrumb-item'>{props.subParent}</li>}
+                {props.title && <li className='breadcrumb-item active'>{props.title}</li>}
               </ol>
             </Col>
           </Row>

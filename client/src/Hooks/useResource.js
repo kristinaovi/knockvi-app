@@ -93,9 +93,11 @@ export default function useResource(resource) {
   const createOrUpdate = useCallback(async data => {
     try {
       const res = await api.post(`/${resource}`, data)
+      toast.success(`Create or Update ${resource} success`)
       return res.data
     } catch (err) {
       if (err.response?.status === 422 && Array.isArray(err.response.data.errors)) {
+        toast.error(`Please Complete all Required Field`)
         err.response.data.errors.forEach(e =>
           toast.error(`${e.path}: ${e.msg}`)
         )

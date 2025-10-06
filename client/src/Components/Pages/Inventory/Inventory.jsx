@@ -1,6 +1,6 @@
 import React, { Fragment, useContext, useState } from 'react';
 import {
-  Container, Row, Col, Card, Nav, NavItem, NavLink, Modal, ModalHeader, ModalBody
+  Container, Row, Col, Card, Nav, NavItem, NavLink
 } from 'reactstrap';
 import { Target, Info, CheckCircle, PlusCircle } from 'react-feather';
 import { Closed, All, Open, Add } from '../../../Constant';
@@ -8,7 +8,7 @@ import { Breadcrumbs } from '../../../AbstractElements';
 import ProjectContext from '../../../_helper/Project/index';
 import CustomizerContext from '../../../_helper/Customizer';
 import InventoryList from './InventoryList';
-import NewInventory from './NewInventory'; // ✅ Import komponen modal form baru
+import NewInventory from './NewInventory'; // ✅ modal langsung dipanggil
 
 const Inventory = () => {
   const { layoutURL } = useContext(CustomizerContext);
@@ -29,33 +29,7 @@ const Inventory = () => {
               <Row>
                 <Col md="6">
                   <Nav tabs className="border-tab">
-                    <NavItem>
-                      <NavLink
-                        className={activeTab === "1" ? "active" : ""}
-                        onClick={() => setActiveTab("1")}
-                      >
-                        <Target />
-                        {All}
-                      </NavLink>
-                    </NavItem>
-                    <NavItem>
-                      <NavLink
-                        className={activeTab === "2" ? "active" : ""}
-                        onClick={() => setActiveTab("2")}
-                      >
-                        <Info />
-                        {Open}
-                      </NavLink>
-                    </NavItem>
-                    <NavItem>
-                      <NavLink
-                        className={activeTab === "3" ? "active" : ""}
-                        onClick={() => setActiveTab("3")}
-                      >
-                        <CheckCircle />
-                        {Closed}
-                      </NavLink>
-                    </NavItem>
+                    
                   </Nav>
                 </Col>
                 <Col md="6">
@@ -78,13 +52,8 @@ const Inventory = () => {
         </Row>
       </Container>
 
-      {/* Modal Add Inventory */}
-      <Modal isOpen={modalOpen} toggle={toggleModal} size="lg">
-        <ModalHeader toggle={toggleModal}>Add New Inventory</ModalHeader>
-        <ModalBody>
-          <NewInventory toggleModal={toggleModal} />
-        </ModalBody>
-      </Modal>
+      {/* ✅ NewInventory sudah meng-handle modal sendiri */}
+      <NewInventory isOpen={modalOpen} toggle={toggleModal} />
     </Fragment>
   );
 };

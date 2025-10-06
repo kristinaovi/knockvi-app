@@ -1,5 +1,10 @@
 // src/Components/Pages/Users/UserList.jsx
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
+import React, {
+  useState,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import {
   Card,
   CardBody,
@@ -12,6 +17,9 @@ import {
   FormGroup,
   Label,
   Input,
+  ModalFooter,
+  Row,
+  Col,
 } from "reactstrap";
 import DataTable from "react-data-table-component";
 import Select from "react-select";
@@ -33,11 +41,25 @@ const statusOptions = [
 ];
 
 const UserList = forwardRef((props, ref) => {
-  const { items: users, loading, error, fetchAll: fetchUsers, createOrUpdate:updateItem } = useUsers();
+  const {
+    items: users,
+    loading,
+    error,
+    fetchAll: fetchUsers,
+    createOrUpdate: updateItem,
+  } = useUsers();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState(null);
+const [formData, setFormData] = useState({
+  userName: "",
+  userEmail: "",
+  userDepartment: "",
+  userBadge: "",
+  userRole: "",
+  userStatus: "",
+  userPhoto: null,
+});
 
   // Expose method ke parent supaya User.jsx bisa refresh tabel
   useImperativeHandle(ref, () => ({
@@ -71,11 +93,17 @@ const UserList = forwardRef((props, ref) => {
   };
 
   const handleRoleChange = (selected) => {
-    setFormData((prev) => ({ ...prev, userRole: selected ? selected.value : "" }));
+    setFormData((prev) => ({
+      ...prev,
+      userRole: selected ? selected.value : "",
+    }));
   };
 
   const handleStatusChange = (selected) => {
-    setFormData((prev) => ({ ...prev, userStatus: selected ? selected.value : "" }));
+    setFormData((prev) => ({
+      ...prev,
+      userStatus: selected ? selected.value : "",
+    }));
   };
 
   const handleSave = async () => {
@@ -94,19 +122,36 @@ const UserList = forwardRef((props, ref) => {
       name: "Name",
       selector: (row) => row.name,
       cell: (row) => (
-        <Button color="link" onClick={() => toggleModal(row)}>
+        <Button className="btn btn-link p-0 text-primary" color="link" onClick={() => toggleModal(row)}>
           {row.name}
         </Button>
       ),
       sortable: true,
     },
-    { name: "Badge No", selector: (row) => row.badge_number, sortable: true },
-    { name: "Department", selector: (row) => row.department, sortable: true },
-    { name: "Email", selector: (row) => row.email, sortable: true },
-    { name: "Role", selector: (row) => row.role, sortable: true },
+    { name: "Badge No", selector: (row) => row.badge_number, sortable: true, grow: 0.8, left: true },
+    { name: "Department", selector: (row) => row.department, sortable: true, grow: 0.8, left: true },
+{
+  name: "Email",
+  selector: row => row.email,
+  sortable: true,
+  grow: 1,
+  left: true,
+  style: {
+    justifyContent: "flex-start",
+    textAlign: "left",
+  },
+  headerStyle: {
+    justifyContent: "flex-start",
+    textAlign: "left",
+  },
+},
+
+    { name: "Role", selector: (row) => row.role, sortable: true, grow: 0.8, left: true },
     {
       name: "Status",
       selector: (row) => row.status,
+      grow: 0.5,
+      left: true,
       cell: (row) => (
         <span
           className={`badge ${
@@ -132,7 +177,7 @@ const UserList = forwardRef((props, ref) => {
         {loading && <p>Loading...</p>}
         {error && <p className="text-danger">Failed to load users</p>}
         {!loading && !error && (
-          <DataTable columns={columns} data={users || []} striped pagination />
+          <DataTable   className="support-table" columns={columns} data={users || []} striped pagination />
         )}
 
         <Modal isOpen={modalOpen} toggle={() => setModalOpen(false)} size="lg">
@@ -140,90 +185,106 @@ const UserList = forwardRef((props, ref) => {
             toggle={() => setModalOpen(false)}
             className="position-relative pe-5"
           >
-            User Detail – {formData?.userName || selectedUser?.name}
-            <Button
-              className="position-absolute top-50 end-0 translate-middle-y me-5"
-              color={editMode ? "success" : "primary"}
-              onClick={() => {
-                if (editMode) {
-                  handleSave();
-                } else {
-                  setEditMode(true);
-                }
-              }}
-            >
-              {editMode ? "Save" : "Edit"}
-            </Button>
+            Details – {formData?.userName || selectedUser?.name}
           </ModalHeader>
           <ModalBody>
-            {formData && (
-              <>
-                {editMode ? (
-                  <Form>
-                    <FormGroup>
-                      <Label>Name</Label>
-                      <Input
-                        name="userName"
-                        value={formData.userName}
-                        onChange={handleChange}
-                      />
-                    </FormGroup>
-                    <FormGroup>
-                      <Label>Email</Label>
-                      <Input
-                        name="userEmail"
-                        value={formData.userEmail}
-                        onChange={handleChange}
-                      />
-                    </FormGroup>
-                    <FormGroup>
-                      <Label>Department</Label>
-                      <Input
-                        name="userDepartment"
-                        value={formData.userDepartment}
-                        onChange={handleChange}
-                      />
-                    </FormGroup>
-                    <FormGroup>
-                      <Label>Badge No</Label>
-                      <Input
-                        name="userBadge"
-                        value={formData.userBadge}
-                        onChange={handleChange}
-                      />
-                    </FormGroup>
-                    <FormGroup>
-                      <Label>Role</Label>
-                      <Select
-                        options={roleOptions}
-                        value={roleOptions.find(opt => opt.value === formData.userRole) || null}
-                        onChange={handleRoleChange}
-                        isClearable
-                      />
-                    </FormGroup>
-                    <FormGroup>
-                      <Label>Status</Label>
-                      <Select
-                        options={statusOptions}
-                        value={statusOptions.find(opt => opt.value === formData.userStatus) || null}
-                        onChange={handleStatusChange}
-                        isClearable
-                      />
-                    </FormGroup>
-                  </Form>
-                ) : (
-                  <div className="mb-3">
-                    <p><strong>Name:</strong> {formData.userName}</p>
-                    <p><strong>Email:</strong> {formData.userEmail}</p>
-                    <p><strong>Department:</strong> {formData.userDepartment}</p>
-                    <p><strong>Badge No:</strong> {formData.userBadge}</p>
-                    <p><strong>Role:</strong> {formData.userRole}</p>
-                    <p><strong>Status:</strong> {formData.userStatus}</p>
-                  </div>
-                )}
-              </>
-            )}
+            <div className="mb-3">
+              <Row>
+                {/* Foto Bulat */}
+                <Col md="3" className="text-center">
+                  {formData && (
+                    <img
+                      src={
+                        formData.userPhoto || "https://i.pravatar.cc/150?img=12"
+                      }
+                      alt="User"
+                      className="rounded-circle border"
+                      width="120"
+                      height="120"
+                    />
+                  )}
+                </Col>
+
+                {/* Data User */}
+                <Col md="9">
+                  <Row className="mb-2">
+                    <Col md={6}>
+                      <FormGroup>
+                        <strong>Name:</strong>
+                        <br />
+                        {formData.userName}
+                      </FormGroup>
+                    </Col>
+                    <Col md={6}>
+                      <FormGroup>
+                        <strong>Email:</strong>
+                        <br />
+                        {formData.userEmail}
+                      </FormGroup>
+                    </Col>
+                  </Row>
+
+                  <Row className="mb-2">
+                    <Col md={6}>
+                      <FormGroup>
+                        <strong>Department:</strong>
+                        <br />
+                        {formData.userDepartment}
+                      </FormGroup>
+                    </Col>
+                    <Col md={6}>
+                      <FormGroup>
+                        <strong>Badge No:</strong>
+                        <br />
+                        {formData.userBadge}
+                      </FormGroup>
+                    </Col>
+                  </Row>
+
+                  <Row className="mb-2">
+                    <Col md={6}>
+                      <FormGroup>
+                        <strong>Role:</strong>
+                        <br />
+                        {formData.userRole}
+                      </FormGroup>
+                    </Col>
+                    <Col md={6}>
+                      <FormGroup>
+                        <strong>Status:</strong>
+                        <br />
+                        <span
+                          className={`badge ${
+                            formData.userStatus === "Active"
+                              ? "bg-success"
+                              : "bg-warning"
+                          }`}
+                        >
+                          {formData.userStatus}
+                        </span>
+                      </FormGroup>
+                    </Col>
+                  </Row>
+                </Col>
+              </Row>
+            </div>
           </ModalBody>
+          <ModalFooter>
+            {editMode ? (
+              <>
+                <Button color="success" onClick={handleSave}>
+                  Save
+                </Button>
+                <Button color="secondary" onClick={() => setEditMode(false)}>
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <Button color="primary" onClick={() => setEditMode(true)}>
+                Edit
+              </Button>
+            )}
+          </ModalFooter>
         </Modal>
       </CardBody>
     </Card>
