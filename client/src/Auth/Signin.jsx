@@ -48,6 +48,7 @@ const Signin = ({ selected }) => {
       // store JWT in localStorage
       localStorage.setItem("token", data.token)
       localStorage.setItem("login", "true")
+      localStorage.setItem("role", data.user?.role)
 
       toast.success("Successfully logged in!")
       // redirect to dashboard
