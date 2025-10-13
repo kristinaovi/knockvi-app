@@ -1,3 +1,4 @@
+import api from '../../api/axios'
 
 export const OrderThisMonthChart = {
   series: [
@@ -172,10 +173,13 @@ export const OrderThisMonthChart = {
 };
 
 // Profit  Monthly //
-export const MonthlyProfitsChartData = {
-  series: [0, 0, 0], // hanya 3 data
+export const MonthlyProfitsChartData = async () => {
+  const data = await api.get(`/dashboards/parts`).then((res) => res.data)
+  console.log(Object.values(data.data).map((d) => d.category))
+
+  return { series: Object.values(data.data).map((d) => d.total), // hanya 3 data
   options: {
-    labels: ["CAP", "CASE", "RING"], // label disesuaikan
+    labels: Object.values(data.data).map((d) => d.category), // label disesuaikan
     chart: {
       type: "pie",
       height: 300,
@@ -295,7 +299,7 @@ export const MonthlyProfitsChartData = {
         },
       },
     ],
-  },
+  },}
 };
 
 

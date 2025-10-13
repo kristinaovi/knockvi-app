@@ -14,7 +14,7 @@ const MonthlyProfits = () => {
       </CardHeader>
       <CardBody className='pt-0'>
         <div className='monthly-profit'>
-          <ReactApexChart type='donut' height={300} series={MonthlyProfitsChartData.series} options={MonthlyProfitsChartData.options} />
+          <ReactApexChart type='donut' height={300} series={MonthlyProfitsChartData().series} options={MonthlyProfitsChartData().options} />
         </div>
       </CardBody>
     </Card>

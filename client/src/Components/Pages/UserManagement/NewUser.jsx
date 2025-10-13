@@ -22,6 +22,7 @@ const NewUser = ({ isOpen, toggle }) => {
     userEmail: '',
     userRole: '',
     userStatus: '',
+    password: ''
   });
 
   const roleOptions = [
@@ -130,6 +131,16 @@ const NewUser = ({ isOpen, toggle }) => {
               onChange={handleStatusChange}
               isClearable
               placeholder="Select status..."
+            />
+          </FormGroup>
+          <FormGroup>
+            <Label><strong>Password</strong></Label>
+            <Input
+              type="text"
+              name="password"
+              value={userData.password}
+              onChange={handleChange}
+              placeholder="Enter Password"
             />
           </FormGroup>
         </Form>
