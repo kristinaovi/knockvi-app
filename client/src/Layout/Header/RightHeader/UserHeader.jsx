@@ -36,17 +36,10 @@ const UserHeader = () => {
   return (
     <li className="profile-nav onhover-dropdown pe-0 py-0">
       <div className="media profile-media">
-        <Image
-          attrImage={{
-            className: "b-r-10 m-0",
-            src: `${authenticated ? auth0_profile.picture : profile}`,
-            alt: "",
-          }}
-        />
+
         <div className="media-body">
           <span>{authenticated ? auth0_profile.name : name}</span>
           <P attrPara={{ className: "mb-0 font-roboto" }}>
-            {Admin} <i className="middle fa fa-angle-down"></i>
           </P>
         </div>
       </div>
